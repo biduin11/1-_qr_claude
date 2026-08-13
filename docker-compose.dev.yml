@@ -19,7 +19,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
       target: dev
     restart: unless-stopped
     depends_on:
