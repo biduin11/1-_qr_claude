@@ -1,0 +1,49 @@
+import type { ActiveMaterialRequirement } from "@/lib/worker/active-requirement";
+
+/**
+ * Крупная, читаемая карточка требуемого материала — раздел 34 ТЗ (большие
+ * touch targets и текст в рабочем flow, никаких мелких таблиц).
+ */
+export function RequirementCard({
+  requirement,
+}: {
+  requirement: Pick<
+    ActiveMaterialRequirement,
+    "ralDisplayName" | "thicknessDisplayName" | "manufacturerDisplayName" | "coatingDisplayName"
+  >;
+}) {
+  return (
+    <dl
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr",
+        gap: "0.75rem",
+        fontSize: "1.5rem",
+        width: "100%",
+        maxWidth: 480,
+        margin: "0 auto",
+      }}
+    >
+      <Row label="Цвет" value={requirement.ralDisplayName} />
+      <Row label="Толщина" value={requirement.thicknessDisplayName} />
+      <Row label="Производитель" value={requirement.manufacturerDisplayName} />
+      <Row label="Покрытие" value={requirement.coatingDisplayName} />
+    </dl>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        borderBottom: "1px solid #eee",
+        paddingBottom: "0.5rem",
+      }}
+    >
+      <dt style={{ color: "#666" }}>{label}</dt>
+      <dd style={{ margin: 0, fontWeight: 700 }}>{value}</dd>
+    </div>
+  );
+}

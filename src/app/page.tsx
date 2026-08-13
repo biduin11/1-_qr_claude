@@ -1,0 +1,41 @@
+import Link from "next/link";
+
+/**
+ * Главный экран работника (раздел 19 ТЗ). В основном сценарии сюда не
+ * заходят — QR накладной открывает /check напрямую через камеру телефона
+ * (раздел 5). Этот экран — запасной вход, если приложение открыто без
+ * предварительного скана (например, с главного экрана PWA).
+ */
+export default function HomePage() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem",
+        gap: "2rem",
+        textAlign: "center",
+      }}
+    >
+      <h1 style={{ fontSize: "2rem", margin: 0 }}>КОНТРОЛЬ МЕТАЛЛА</h1>
+      <Link
+        href="/scan/invoice"
+        style={{
+          fontSize: "1.5rem",
+          padding: "1.5rem 2rem",
+          width: "100%",
+          maxWidth: 480,
+          textDecoration: "none",
+          border: "1px solid #333",
+          borderRadius: 8,
+          color: "inherit",
+        }}
+      >
+        СКАНИРОВАТЬ НАКЛАДНУЮ
+      </Link>
+    </main>
+  );
+}

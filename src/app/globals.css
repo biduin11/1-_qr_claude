@@ -1,0 +1,34 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: #111;
+  background: #fff;
+}
+
+/* Паспорт рулона для печати (Iteration 8, раздел 15 ТЗ) — скрывает
+   admin-навигацию/кнопки при печати, оставляя только сам "паспорт". */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-page {
+    page-break-inside: avoid;
+  }
+}

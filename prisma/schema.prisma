@@ -1,0 +1,99 @@
+// Схема соответствует ARCHITECTURE.md §4 (модели) и §4.6/§11.1 (EnvironmentGuard).
+// Любое отклонение от ARCHITECTURE.md должно сначала обновить документ, потом схему.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String         @id @default(cuid())
+  username     String         @unique
+  passwordHash String
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+}
+
+model AdminSession {
+  id          String    @id @default(cuid())
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+
+  @@index([adminUserId])
+}
+
+model Color {
+  id          String   @id @default(cuid())
+  code        String   @unique // "7024"
+  displayName String // "RAL 7024"
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  coils       Coil[]
+}
+
+model Thickness {
+  id              String   @id @default(cuid())
+  valueHundredths Int      @unique // 50 => 0.50 мм
+  displayName     String // "0,50 мм"
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  coils           Coil[]
+}
+
+model Manufacturer {
+  id          String   @id @default(cuid())
+  code        String   @unique // "UZBEKISTAN"
+  displayName String
+  aliases     String[] @default([])
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  coils       Coil[]
+}
+
+model Coating {
+  id          String   @id @default(cuid())
+  code        String   @unique // "VIKING"
+  displayName String
+  aliases     String[] @default([])
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  coils       Coil[]
+}
+
+model Coil {
+  id             String       @id @default(cuid())
+  colorId        String
+  color          Color        @relation(fields: [colorId], references: [id])
+  thicknessId    String
+  thickness      Thickness    @relation(fields: [thicknessId], references: [id])
+  manufacturerId String
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  coatingId      String
+  coating        Coating      @relation(fields: [coatingId], references: [id])
+  active         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([active])
+  @@index([colorId, thicknessId, manufacturerId, coatingId])
+}
+
+/// Технический маркер физического окружения БД — см. ARCHITECTURE.md §11.1.
+/// Не бизнес-сущность. Ровно одна строка на инстанс БД, проставляется вручную
+/// один раз при создании инстанса (см. prisma/seed.ts).
+model EnvironmentGuard {
+  id  Int    @id @default(1)
+  env String // "development" | "production"
+}

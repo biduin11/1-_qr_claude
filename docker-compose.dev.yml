@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kontrol_metalla
+      POSTGRES_PASSWORD: kontrol_metalla_dev
+      POSTGRES_DB: kontrol_metalla
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kontrol_metalla"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      APP_ENV: development
+      DATABASE_URL: postgresql://kontrol_metalla:kontrol_metalla_dev@db:5432/kontrol_metalla
+      # Только для локальной песочницы — не использовать в проде.
+      SESSION_COOKIE_SECRET: dev-only-secret-please-change-me-1234567890
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - app-node-modules:/app/node_modules
+      - app-next-cache:/app/.next
+    # `npm install` первым шагом — синхронизирует именованный volume node_modules
+    # с package.json/package-lock.json при каждом старте контейнера (быстрый
+    # no-op, если ничего не изменилось). Без этого добавление зависимости на
+    # хосте требовало вручную `docker volume rm ..._app-node-modules` перед
+    # `up` — наступали на это несколько раз подряд, see DEPLOYMENT.md.
+    command: sh -c "npm install && npx prisma migrate deploy && npm run db:seed && npm run dev"
+
+volumes:
+  db-data:
+  app-node-modules:
+  app-next-cache:
