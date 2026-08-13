@@ -40,7 +40,11 @@ async function ensureEnvironmentGuard(): Promise<void> {
   console.log(`[seed] EnvironmentGuard уже соответствует env="${appEnv}", пропускаю`);
 }
 
-/** Минимальные справочные данные для разработки — идемпотентно (upsert по code). */
+/**
+ * Минимальные справочные данные для разработки — идемпотентно (upsert по code).
+ * Только для APP_ENV=development (см. main()) — реальные справочники prod
+ * администратор заводит сам через admin UI/Excel-импорт, не через seed.
+ */
 async function seedReferenceData(): Promise<void> {
   const colors = [
     { code: "7024", displayName: "RAL 7024" },
@@ -117,10 +121,17 @@ async function seedDevAdmin(): Promise<void> {
   );
 }
 
+/**
+ * В prod (APP_ENV=production) выполняет только ensureEnvironmentGuard() —
+ * одноразовую маркировку БД при подготовке нового инстанса (ARCHITECTURE.md
+ * §11.1). Демо-справочники и dev-админ — только для APP_ENV=development,
+ * иначе `npm run db:seed` против prod-БД записал бы туда тестовые значения
+ * (RAL 7024/9003, "Узбекистан"/"Viking" и т.д.), которых там быть не должно.
+ */
 async function main(): Promise<void> {
   await ensureEnvironmentGuard();
-  await seedReferenceData();
   if (process.env.APP_ENV === "development") {
+    await seedReferenceData();
     await seedDevAdmin();
   }
 }
