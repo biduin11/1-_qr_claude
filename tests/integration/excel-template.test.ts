@@ -8,6 +8,8 @@ import ExcelJS from "exceljs";
 import { PrismaClient } from "@prisma/client";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
+import { COLUMN_LABELS } from "@/lib/excel/parse";
+
 const { generateImportTemplate } = await import("@/lib/excel/template");
 
 const prisma = new PrismaClient();
@@ -52,10 +54,10 @@ describe("generateImportTemplate (интеграционный)", () => {
 
     const importSheet = workbook.getWorksheet("Import");
     expect(importSheet).toBeDefined();
-    expect(importSheet?.getRow(1).getCell(1).value).toBe("ral");
-    expect(importSheet?.getRow(1).getCell(2).value).toBe("thickness");
-    expect(importSheet?.getRow(1).getCell(3).value).toBe("manufacturer");
-    expect(importSheet?.getRow(1).getCell(4).value).toBe("coating");
+    expect(importSheet?.getRow(1).getCell(1).value).toBe(COLUMN_LABELS.ral);
+    expect(importSheet?.getRow(1).getCell(2).value).toBe(COLUMN_LABELS.thickness);
+    expect(importSheet?.getRow(1).getCell(3).value).toBe(COLUMN_LABELS.manufacturer);
+    expect(importSheet?.getRow(1).getCell(4).value).toBe(COLUMN_LABELS.coating);
 
     const referenceSheet = workbook.getWorksheet("Reference");
     expect(referenceSheet).toBeDefined();
@@ -67,10 +69,10 @@ describe("generateImportTemplate (интеграционный)", () => {
     });
 
     // Активный RAL 7024 присутствует, деактивированный RAL 9003 — нет.
-    expect(referenceRows).toContainEqual(["ral", "7024", "RAL 7024"]);
+    expect(referenceRows).toContainEqual([COLUMN_LABELS.ral, "7024", "RAL 7024"]);
     expect(referenceRows.some((row) => row[1] === "9003")).toBe(false);
-    expect(referenceRows).toContainEqual(["manufacturer", "uzbekistan", "Узбекистан"]);
-    expect(referenceRows).toContainEqual(["coating", "viking", "Viking"]);
+    expect(referenceRows).toContainEqual([COLUMN_LABELS.manufacturer, "uzbekistan", "Узбекистан"]);
+    expect(referenceRows).toContainEqual([COLUMN_LABELS.coating, "viking", "Viking"]);
   });
 
   it("пустые справочники -> Reference лист без строк данных, но не падает", async () => {

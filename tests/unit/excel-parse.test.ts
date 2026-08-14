@@ -1,14 +1,16 @@
 import ExcelJS from "exceljs";
 import { describe, expect, it } from "vitest";
 
-import { ExcelParseError, MAX_IMPORT_ROWS, parseImportFile } from "@/lib/excel/parse";
+import { COLUMN_LABELS, ExcelParseError, MAX_IMPORT_ROWS, parseImportFile } from "@/lib/excel/parse";
+
+const DEFAULT_HEADERS = [COLUMN_LABELS.ral, COLUMN_LABELS.thickness, COLUMN_LABELS.manufacturer, COLUMN_LABELS.coating];
 
 async function buildWorkbook(options: {
   sheetName?: string;
   headers?: string[];
   rows?: Array<Array<string | number>>;
 }): Promise<Buffer> {
-  const { sheetName = "Import", headers = ["ral", "thickness", "manufacturer", "coating"], rows = [] } = options;
+  const { sheetName = "Import", headers = DEFAULT_HEADERS, rows = [] } = options;
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet(sheetName);
   sheet.addRow(headers);
@@ -53,7 +55,7 @@ describe("parseImportFile", () => {
 
   it("допускает колонки в произвольном порядке", async () => {
     const buffer = await buildWorkbook({
-      headers: ["coating", "ral", "manufacturer", "thickness"],
+      headers: [COLUMN_LABELS.coating, COLUMN_LABELS.ral, COLUMN_LABELS.manufacturer, COLUMN_LABELS.thickness],
       rows: [["viking", "7024", "uzbekistan", "0.50"]],
     });
 
@@ -82,7 +84,9 @@ describe("parseImportFile", () => {
   });
 
   it("отсутствие обязательной колонки -> ExcelParseError INVALID_FILE_FORMAT", async () => {
-    const buffer = await buildWorkbook({ headers: ["ral", "thickness", "manufacturer"] });
+    const buffer = await buildWorkbook({
+      headers: [COLUMN_LABELS.ral, COLUMN_LABELS.thickness, COLUMN_LABELS.manufacturer],
+    });
     await expect(parseImportFile(buffer)).rejects.toBeInstanceOf(ExcelParseError);
     await expect(parseImportFile(buffer)).rejects.toMatchObject({ code: "INVALID_FILE_FORMAT" });
   });

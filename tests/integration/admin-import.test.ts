@@ -33,6 +33,7 @@ vi.mock("next/headers", () => ({
 const { POST: parseImport } = await import("@/app/api/admin/import/parse/route");
 const { POST: confirmImport } = await import("@/app/api/admin/import/confirm/route");
 const { resetImportIdempotencyCache } = await import("@/lib/admin/import-idempotency");
+const { COLUMN_LABELS } = await import("@/lib/excel/parse");
 
 const prisma = new PrismaClient();
 
@@ -49,7 +50,7 @@ async function loginAsAdmin(): Promise<void> {
 async function buildXlsx(rows: Array<Array<string | number>>): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Import");
-  sheet.addRow(["ral", "thickness", "manufacturer", "coating"]);
+  sheet.addRow([COLUMN_LABELS.ral, COLUMN_LABELS.thickness, COLUMN_LABELS.manufacturer, COLUMN_LABELS.coating]);
   for (const row of rows) sheet.addRow(row);
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }

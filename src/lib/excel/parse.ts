@@ -5,6 +5,20 @@ export const MAX_IMPORT_ROWS = 5000;
 
 const REQUIRED_COLUMNS = ["ral", "thickness", "manufacturer", "coating"] as const;
 
+/**
+ * Заголовки колонок листа "Import" и подписи "Тип" на листе "Reference" в
+ * шаблоне (EXCEL_IMPORT.md) — человекочитаемые русские подписи вместо
+ * служебных внутренних ключей. Парсер ищет колонку по этому тексту
+ * заголовка (регистронезависимо), не по позиции — единственное место,
+ * которое нужно менять при изменении подписей.
+ */
+export const COLUMN_LABELS: Record<(typeof REQUIRED_COLUMNS)[number], string> = {
+  ral: "Цвет RAL",
+  thickness: "Толщина, мм",
+  manufacturer: "Производитель",
+  coating: "Покрытие",
+};
+
 export class ExcelParseError extends Error {
   constructor(
     public readonly code: "INVALID_FILE_FORMAT" | "TOO_MANY_ROWS",
@@ -69,11 +83,13 @@ export async function parseImportFile(buffer: Buffer): Promise<RawImportRow[]> {
     if (value) columnIndex.set(value, colNumber);
   });
 
-  const missingColumns = REQUIRED_COLUMNS.filter((column) => !columnIndex.has(column));
+  const missingColumns = REQUIRED_COLUMNS.filter(
+    (column) => !columnIndex.has(COLUMN_LABELS[column].toLowerCase()),
+  );
   if (missingColumns.length > 0) {
     throw new ExcelParseError(
       "INVALID_FILE_FORMAT",
-      `В листе "Import" отсутствуют колонки: ${missingColumns.join(", ")}`,
+      `В листе "Import" отсутствуют колонки: ${missingColumns.map((column) => COLUMN_LABELS[column]).join(", ")}`,
     );
   }
 
@@ -81,7 +97,7 @@ export async function parseImportFile(buffer: Buffer): Promise<RawImportRow[]> {
   for (let rowNumber = 2; rowNumber <= sheet.rowCount; rowNumber += 1) {
     const row = sheet.getRow(rowNumber);
     const getColumn = (name: (typeof REQUIRED_COLUMNS)[number]): string => {
-      const colNumber = columnIndex.get(name);
+      const colNumber = columnIndex.get(COLUMN_LABELS[name].toLowerCase());
       if (!colNumber) return "";
       return cellToString(row.getCell(colNumber).value);
     };
