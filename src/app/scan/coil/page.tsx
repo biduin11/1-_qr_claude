@@ -28,6 +28,7 @@ export default function ScanCoilPage() {
           const id = parseCoilScanUrl(raw, window.location.origin);
           if (id) router.push(`/coil/${id}`);
         }}
+        onCancel={() => router.back()}
       />
     </main>
   );

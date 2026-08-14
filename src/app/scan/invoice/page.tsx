@@ -28,6 +28,7 @@ export default function ScanInvoicePage() {
           const target = parseCheckScanUrl(raw, window.location.origin);
           if (target) router.push(target);
         }}
+        onCancel={() => router.back()}
       />
     </main>
   );

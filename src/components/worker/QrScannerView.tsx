@@ -20,10 +20,13 @@ import { useEffect, useRef, useState } from "react";
 export function QrScannerView({
   validate,
   onScan,
+  onCancel,
   instructions,
 }: {
   validate: (rawValue: string) => boolean;
   onScan: (rawValue: string) => void;
+  /** Кнопка выхода со сканера без сканирования — раньше её не было вообще. */
+  onCancel: () => void;
   instructions: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -76,17 +79,31 @@ export function QrScannerView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const cancelButton = (
+    <button
+      type="button"
+      onClick={onCancel}
+      style={{ padding: "0.5rem 1rem", alignSelf: "flex-start" }}
+    >
+      ← Отмена
+    </button>
+  );
+
   if (cameraError) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
-        <p style={{ color: "#b00020", fontSize: "1.1rem" }}>Не удалось получить доступ к камере</p>
-        <p style={{ color: "#666" }}>{cameraError}</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "2rem" }}>
+        {cancelButton}
+        <div style={{ textAlign: "center" }}>
+          <p style={{ color: "#b00020", fontSize: "1.1rem" }}>Не удалось получить доступ к камере</p>
+          <p style={{ color: "#666" }}>{cameraError}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+      {cancelButton}
       <p style={{ fontSize: "1.1rem", textAlign: "center" }}>{instructions}</p>
       <video ref={videoRef} style={{ width: "100%", maxWidth: 480, borderRadius: 8 }} muted playsInline />
       {rejectedValue && (
