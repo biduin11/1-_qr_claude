@@ -3,55 +3,67 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { instances, startState } = vi.hoisted(() => ({
-  instances: [] as FakeQrScannerInstance[],
+  instances: [] as FakeHtml5QrcodeInstance[],
   startState: { shouldFail: false },
 }));
 
-type FakeQrScannerInstance = {
-  onDecode: (result: { data: string }) => void;
-  started: boolean;
+type SuccessCallback = (decodedText: string) => void;
+
+type FakeHtml5QrcodeInstance = {
+  elementId: string;
   stopped: boolean;
-  destroyed: boolean;
-  start: () => Promise<void>;
-  stop: () => void;
-  destroy: () => void;
+  cleared: boolean;
+  onSuccess: SuccessCallback | null;
+  start: (
+    cameraIdOrConfig: unknown,
+    configuration: unknown,
+    qrCodeSuccessCallback: SuccessCallback,
+    qrCodeErrorCallback: (errorMessage: string) => void,
+  ) => Promise<null>;
+  stop: () => Promise<void>;
+  clear: () => void;
 };
 
-vi.mock("qr-scanner", () => {
-  class FakeQrScanner implements FakeQrScannerInstance {
-    onDecode: (result: { data: string }) => void;
-    started = false;
+vi.mock("html5-qrcode", () => {
+  class FakeHtml5Qrcode implements FakeHtml5QrcodeInstance {
+    elementId: string;
     stopped = false;
-    destroyed = false;
+    cleared = false;
+    onSuccess: SuccessCallback | null = null;
 
-    constructor(_video: unknown, onDecode: (result: { data: string }) => void) {
-      this.onDecode = onDecode;
+    constructor(elementId: string) {
+      this.elementId = elementId;
       instances.push(this);
     }
 
-    start(): Promise<void> {
+    start(
+      _cameraIdOrConfig: unknown,
+      _configuration: unknown,
+      qrCodeSuccessCallback: SuccessCallback,
+    ): Promise<null> {
       if (startState.shouldFail) {
         return Promise.reject(new Error("Permission denied"));
       }
-      this.started = true;
+      this.onSuccess = qrCodeSuccessCallback;
+      return Promise.resolve(null);
+    }
+
+    stop(): Promise<void> {
+      this.stopped = true;
       return Promise.resolve();
     }
 
-    stop(): void {
-      this.stopped = true;
-    }
-
-    destroy(): void {
-      this.destroyed = true;
+    clear(): void {
+      this.cleared = true;
     }
   }
 
-  return { default: FakeQrScanner };
+  return { Html5Qrcode: FakeHtml5Qrcode };
 });
 
 const { QrScannerView } = await import("@/components/worker/QrScannerView");
 
-describe("QrScannerView (мок qr-scanner)", () => {
+describe("QrScannerView (мок html5-qrcode)", () => {
   afterEach(() => {
     cleanup();
     instances.length = 0;
@@ -65,7 +77,7 @@ describe("QrScannerView (мок qr-scanner)", () => {
     const instance = instances[0]!;
 
     act(() => {
-      instance.onDecode({ data: "https://example.com/coil/abc" });
+      instance.onSuccess?.("https://example.com/coil/abc");
     });
 
     expect(onScan).toHaveBeenCalledTimes(1);
@@ -80,9 +92,9 @@ describe("QrScannerView (мок qr-scanner)", () => {
     const instance = instances[0]!;
 
     act(() => {
-      instance.onDecode({ data: "same-value" });
-      instance.onDecode({ data: "same-value" });
-      instance.onDecode({ data: "same-value" });
+      instance.onSuccess?.("same-value");
+      instance.onSuccess?.("same-value");
+      instance.onSuccess?.("same-value");
     });
 
     expect(onScan).toHaveBeenCalledTimes(1);
@@ -96,7 +108,7 @@ describe("QrScannerView (мок qr-scanner)", () => {
     const instance = instances[0]!;
 
     act(() => {
-      instance.onDecode({ data: "https://evil.example.com/anything" });
+      instance.onSuccess?.("https://evil.example.com/anything");
     });
 
     expect(validate).toHaveBeenCalledWith("https://evil.example.com/anything");
@@ -113,8 +125,8 @@ describe("QrScannerView (мок qr-scanner)", () => {
     const instance = instances[0]!;
 
     act(() => {
-      instance.onDecode({ data: "invalid" });
-      instance.onDecode({ data: "valid" });
+      instance.onSuccess?.("invalid");
+      instance.onSuccess?.("valid");
     });
 
     expect(onScan).toHaveBeenCalledTimes(1);
@@ -129,9 +141,8 @@ describe("QrScannerView (мок qr-scanner)", () => {
     const instance = instances[0]!;
 
     unmount();
-
-    expect(instance.stopped).toBe(true);
-    expect(instance.destroyed).toBe(true);
+    await waitFor(() => expect(instance.stopped).toBe(true));
+    await waitFor(() => expect(instance.cleared).toBe(true));
   });
 
   it("кнопка «Отмена» вызывает onCancel (раньше выйти со сканера без сканирования было нельзя)", async () => {

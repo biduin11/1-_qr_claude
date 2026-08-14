@@ -1,13 +1,16 @@
 "use client";
 
-import QrScanner from "qr-scanner";
-import { useEffect, useRef, useState } from "react";
+import { Html5Qrcode } from "html5-qrcode";
+import { useEffect, useId, useRef, useState } from "react";
 
 /**
- * Встроенный веб-сканер QR (раздел 15 ТЗ). Декодирование — qr-scanner
- * (Web Worker, не блокирует UI; не завязан на BarcodeDetector, которого нет
- * в WebKit/iOS — ARCHITECTURE.md §10). Требует защищённый контекст (HTTPS
- * или localhost) — без него getUserMedia недоступен браузеру в принципе.
+ * Встроенный веб-сканер QR (раздел 15 ТЗ). Декодирование — `html5-qrcode`
+ * (движок ZXing поверх `getUserMedia`). Не `qr-scanner` (nimiq) — та
+ * библиотека доказанно не декодирует кадры на iOS Safari/Chromium-на-iOS:
+ * превью с камеры показывается нормально, ошибок нет, но QR никогда не
+ * распознаётся (воспроизведено на реальном устройстве при проверке
+ * Iteration 6/10; совпадает с давними открытыми issues в репозитории
+ * nimiq/qr-scanner — #33, #58, #121). См. Decision Log ARCHITECTURE.md §15.
  *
  * `validate` решает, распознан ли QR как "свой" (только /coil/:id или только
  * /check — раздел 8 ТЗ, пункт 9 чек-листа); нераспознанный QR не прерывает
@@ -29,55 +32,68 @@ export function QrScannerView({
   onCancel: () => void;
   instructions: string;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // html5-qrcode рендерит video/canvas внутрь элемента с этим id сам — ему
+  // нужен id, а не ref на конкретный узел. useId() даёт стабильный уникальный
+  // id при гидратации; двоеточия из формата useId() заменены на дефисы —
+  // библиотека использует id как CSS-селектор внутри себя, а двоеточие в
+  // селекторе без экранирования ломает querySelector.
+  const rawId = useId();
+  const elementId = `qr-reader-${rawId.replace(/:/g, "-")}`;
+  const containerRef = useRef<HTMLDivElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [rejectedValue, setRejectedValue] = useState<string | null>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return undefined;
+    if (!containerRef.current) return undefined;
 
     let handled = false;
     let cancelled = false;
+    const scanner = new Html5Qrcode(elementId, /* verbose */ false);
 
-    const scanner = new QrScanner(
-      video,
-      (result: QrScanner.ScanResult) => {
-        if (handled || cancelled) return;
-        const raw = result.data;
+    scanner
+      .start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          if (handled || cancelled) return;
 
-        if (!validate(raw)) {
-          setRejectedValue(raw);
-          return;
+          if (!validate(decodedText)) {
+            setRejectedValue(decodedText);
+            return;
+          }
+
+          handled = true;
+          setRejectedValue(null);
+          scanner.stop().then(() => scanner.clear()).catch(() => {});
+          onScan(decodedText);
+        },
+        () => {
+          // Вызывается на каждый кадр, где QR не найден — это норма при
+          // непрерывном сканировании, не ошибка доступа к камере. Ничего
+          // не делаем; отличие от cameraError ниже (там реальный сбой
+          // старта — нет разрешения/нет камеры).
+        },
+      )
+      .catch((error: unknown) => {
+        if (!cancelled) {
+          setCameraError(error instanceof Error ? error.message : "Не удалось получить доступ к камере");
         }
-
-        handled = true;
-        setRejectedValue(null);
-        scanner.stop();
-        onScan(raw);
-      },
-      {
-        preferredCamera: "environment",
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
-      },
-    );
-
-    scanner.start().catch((error: unknown) => {
-      if (!cancelled) {
-        setCameraError(error instanceof Error ? error.message : "Не удалось получить доступ к камере");
-      }
-    });
+      });
 
     return () => {
       cancelled = true;
-      scanner.stop();
-      scanner.destroy();
+      scanner
+        .stop()
+        .then(() => scanner.clear())
+        .catch(() => {
+          // start() мог не успеть завершиться (или упасть) — тогда stop()
+          // законно реджектит; сканер и так не запущен, чистить нечего.
+        });
     };
     // validate/onScan подставляются один раз при монтировании — пересоздавать
     // сканер при каждом ререндере не нужно и создавало бы гонки за камеру.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [elementId]);
 
   const cancelButton = (
     <button
@@ -105,7 +121,7 @@ export function QrScannerView({
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
       {cancelButton}
       <p style={{ fontSize: "1.1rem", textAlign: "center" }}>{instructions}</p>
-      <video ref={videoRef} style={{ width: "100%", maxWidth: 480, borderRadius: 8 }} muted playsInline />
+      <div ref={containerRef} id={elementId} style={{ width: "100%", maxWidth: 480, borderRadius: 8, overflow: "hidden" }} />
       {rejectedValue && (
         <p style={{ color: "#b00020", textAlign: "center" }}>
           Это не тот QR-код — попробуйте отсканировать нужный
