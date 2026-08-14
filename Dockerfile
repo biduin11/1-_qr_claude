@@ -43,7 +43,13 @@ RUN npm ci --omit=dev
 FROM base AS runner
 ENV NODE_ENV=production
 ENV PORT=3000
-RUN addgroup --system --gid 1001 nodejs \
+# Timeweb Cloud App Platform запускает healthcheck как `docker exec <container>
+# curl ...` изнутри контейнера, не внешним HTTP-запросом (подтверждено
+# поддержкой Timeweb, Iteration 9) — без curl в образе деплой никогда не
+# завершится, даже если сервер сам по себе полностью здоров и отвечает.
+# node:24-alpine не содержит curl по умолчанию.
+RUN apk add --no-cache curl \
+  && addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
