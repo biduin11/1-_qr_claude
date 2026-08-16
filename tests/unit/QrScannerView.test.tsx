@@ -80,7 +80,9 @@ describe("QrScannerView (мок html5-qrcode)", () => {
       instance.onSuccess?.("https://example.com/coil/abc");
     });
 
-    expect(onScan).toHaveBeenCalledTimes(1);
+    // onScan теперь вызывается после того, как камера реально остановлена
+    // (await stop()+clear()), не синхронно — ждём микротаск.
+    await waitFor(() => expect(onScan).toHaveBeenCalledTimes(1));
     expect(onScan).toHaveBeenCalledWith("https://example.com/coil/abc");
     expect(instance.stopped).toBe(true);
   });
@@ -97,7 +99,7 @@ describe("QrScannerView (мок html5-qrcode)", () => {
       instance.onSuccess?.("same-value");
     });
 
-    expect(onScan).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onScan).toHaveBeenCalledTimes(1));
   });
 
   it("нераспознанный QR (validate=false) -> onScan не вызывается, сканирование продолжается (пункт 9 чек-листа)", async () => {
@@ -129,7 +131,7 @@ describe("QrScannerView (мок html5-qrcode)", () => {
       instance.onSuccess?.("valid");
     });
 
-    expect(onScan).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onScan).toHaveBeenCalledTimes(1));
     expect(onScan).toHaveBeenCalledWith("valid");
   });
 

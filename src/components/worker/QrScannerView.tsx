@@ -64,8 +64,17 @@ export function QrScannerView({
 
           handled = true;
           setRejectedValue(null);
-          scanner.stop().then(() => scanner.clear()).catch(() => {});
-          onScan(decodedText);
+          // Дожидаемся полной остановки камеры/потока, прежде чем звать onScan
+          // (обычно сразу делает router.push) — раньше камера гасилась
+          // "в фоне", не дожидаясь, и переход мог стартовать, пока браузер ещё
+          // разбирается с активным MediaStream. На iOS Safari это правдоподобная
+          // причина прерывания самого первого сетевого запроса при навигации
+          // (см. ARCHITECTURE.md §10, запись от 2026-08-14).
+          scanner
+            .stop()
+            .then(() => scanner.clear())
+            .catch(() => {})
+            .finally(() => onScan(decodedText));
         },
         () => {
           // Вызывается на каждый кадр, где QR не найден — это норма при

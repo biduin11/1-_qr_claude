@@ -7,3 +7,20 @@
 export function isCoilVerdictApiPath(pathname: string): boolean {
   return pathname.startsWith("/api/coil/");
 }
+
+/**
+ * Страница `/coil/:id` — та же логика паттерна, что и `parseCoilScanUrl`
+ * (src/lib/worker/scan-url.ts), чтобы не зацепить что-то постороннее.
+ * NetworkOnly для неё выбран не из соображений устаревших данных (вердикт
+ * МОЖНО/СТОП и так всегда считается отдельным no-store фетчем на
+ * /api/coil/:id, независимо от того, кэширован ли сам HTML — ARCHITECTURE.md
+ * §2/§9), а из-за реального сбоя на iOS Safari: первая навигация на ранее не
+ * посещённый /coil/:id после сканирования иногда обрывалась с "This page
+ * couldn't load" — у NetworkFirst (дефолтная стратегия @serwist/next/worker
+ * для HTML-навигаций) нет кэш-фоллбэка при первом визите, и единственный
+ * сетевой сбой не прощается. См. Decision Log ARCHITECTURE.md §15, запись от
+ * 2026-08-14.
+ */
+export function isCoilPagePath(pathname: string): boolean {
+  return /^\/coil\/[^/]+\/?$/.test(pathname);
+}
