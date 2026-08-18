@@ -186,7 +186,7 @@ export function ReferenceDataManager({
         style={{
           display: "flex",
           gap: "0.75rem",
-          alignItems: "flex-end",
+          alignItems: "flex-start",
           flexWrap: "wrap",
           marginBottom: "1.25rem",
           padding: "1rem",
@@ -195,27 +195,46 @@ export function ReferenceDataManager({
           borderRadius: "var(--radius-lg)",
         }}
       >
-        {fields.map((field) => (
-          <label key={field.name} style={{ display: "flex", flexDirection: "column", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
-            {field.label}
-            <input
-              type={field.type === "number" ? "number" : "text"}
-              value={form[field.name] ?? ""}
-              onChange={(e) => setForm((prev) => ({ ...prev, [field.name]: e.target.value }))}
-              required={field.type !== "aliases"}
-              style={{ marginTop: "0.25rem", padding: "0.4rem 0.5rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
-            />
-            {field.type === "number" && field.helpText && (
-              <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{field.helpText}</span>
-            )}
-            {field.type === "aliases" && (
-              <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>через запятую, необязательно</span>
-            )}
-          </label>
-        ))}
-        <button type="submit" disabled={submitting} style={{ ...buttonStyle, backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}>
-          Добавить
-        </button>
+        {fields.map((field) => {
+          const caption =
+            field.type === "number" && field.helpText
+              ? field.helpText
+              : field.type === "aliases"
+                ? "через запятую, необязательно"
+                : null;
+          return (
+            <label key={field.name} style={{ display: "flex", flexDirection: "column", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+              {field.label}
+              <input
+                type={field.type === "number" ? "number" : "text"}
+                value={form[field.name] ?? ""}
+                onChange={(e) => setForm((prev) => ({ ...prev, [field.name]: e.target.value }))}
+                required={field.type !== "aliases"}
+                style={{ marginTop: "0.25rem", padding: "0.4rem 0.5rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
+              />
+              {/* Подпись всегда занимает строку (даже пустая,  ) — иначе
+                  поля без подписи (например "Название") короче полей с ней
+                  ("Варианты написания"), и высота полей в ряду
+                  расходится, и кнопка "Добавить" встаёт не туда. */}
+              <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "0.2rem" }}>{caption ?? " "}</span>
+            </label>
+          );
+        })}
+        {/* Невидимая строка-заглушка над кнопкой той же высоты, что и
+            подпись поля над инпутом — при alignItems:flex-start кнопка
+            встаёт вровень с инпутами, а не с их подписями. */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <span aria-hidden style={{ fontSize: "0.85rem", visibility: "hidden" }}>
+            &nbsp;
+          </span>
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{ ...buttonStyle, marginTop: "0.25rem", backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}
+          >
+            Добавить
+          </button>
+        </div>
       </form>
       {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
 

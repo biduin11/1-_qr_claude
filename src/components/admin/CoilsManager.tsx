@@ -315,7 +315,7 @@ export function CoilsManager() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 220px",
+              gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
               padding: "0.65rem 1rem",
               backgroundColor: "var(--bg-header)",
               color: "var(--text-muted)",
@@ -341,7 +341,7 @@ export function CoilsManager() {
                 key={item.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 220px",
+                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
                   alignItems: "center",
                   gap: "0.5rem",
                   padding: "0.5rem 1rem",
@@ -389,7 +389,7 @@ export function CoilsManager() {
                 key={item.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 220px",
+                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
                   alignItems: "center",
                   padding: "0.7rem 1rem",
                   backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
@@ -402,19 +402,23 @@ export function CoilsManager() {
                 <span style={{ color: "var(--text-secondary)" }}>{item.manufacturer.displayName}</span>
                 <span style={{ color: "var(--text-secondary)" }}>{item.coating.displayName}</span>
                 <StatusPill active={item.active} />
-                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-                  <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
-                    Открыть
-                  </Link>
-                  <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
-                    Печать
-                  </Link>
-                  <button type="button" onClick={() => startEdit(item)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
-                    Изменить
-                  </button>
-                  <button type="button" onClick={() => toggleActive(item.id, !item.active)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
-                    {item.active ? "Деактивировать" : "Восстановить"}
-                  </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+                    <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
+                      Открыть
+                    </Link>
+                    <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
+                      Печать
+                    </Link>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button type="button" onClick={() => startEdit(item)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
+                      Изменить
+                    </button>
+                    <button type="button" onClick={() => toggleActive(item.id, !item.active)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
+                      {item.active ? "Деактивировать" : "Восстановить"}
+                    </button>
+                  </div>
                 </div>
               </div>
             ),
