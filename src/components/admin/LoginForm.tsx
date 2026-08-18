@@ -42,7 +42,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      <label>
+      <label style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
         Логин
         <input
           type="text"
@@ -50,10 +50,10 @@ export function LoginForm() {
           onChange={(e) => setUsername(e.target.value)}
           autoComplete="username"
           required
-          style={{ display: "block", width: "100%", padding: "0.5rem" }}
+          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
         />
       </label>
-      <label>
+      <label style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
         Пароль
         <input
           type="password"
@@ -61,11 +61,15 @@ export function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
           required
-          style={{ display: "block", width: "100%", padding: "0.5rem" }}
+          style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
         />
       </label>
-      {error && <p style={{ color: "#b00020", margin: 0 }}>{error}</p>}
-      <button type="submit" disabled={submitting} style={{ padding: "0.6rem 1rem" }}>
+      {error && <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        style={{ padding: "0.6rem 1rem", borderRadius: "var(--radius-md)", backgroundColor: "var(--brand-primary)", border: "1px solid var(--border)", color: "var(--on-brand)", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer" }}
+      >
         {submitting ? "Вход…" : "Войти"}
       </button>
     </form>

@@ -108,7 +108,14 @@ export function QrScannerView({
     <button
       type="button"
       onClick={onCancel}
-      style={{ padding: "0.5rem 1rem", alignSelf: "flex-start" }}
+      style={{
+        padding: "0.5rem 1rem",
+        alignSelf: "flex-start",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        backgroundColor: "var(--bg-card)",
+        color: "var(--text-primary)",
+      }}
     >
       ← Отмена
     </button>
@@ -119,8 +126,8 @@ export function QrScannerView({
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "2rem" }}>
         {cancelButton}
         <div style={{ textAlign: "center" }}>
-          <p style={{ color: "#b00020", fontSize: "1.1rem" }}>Не удалось получить доступ к камере</p>
-          <p style={{ color: "#666" }}>{cameraError}</p>
+          <p style={{ color: "var(--danger)", fontSize: "1.1rem" }}>Не удалось получить доступ к камере</p>
+          <p style={{ color: "var(--text-secondary)" }}>{cameraError}</p>
         </div>
       </div>
     );
@@ -130,9 +137,9 @@ export function QrScannerView({
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
       {cancelButton}
       <p style={{ fontSize: "1.1rem", textAlign: "center" }}>{instructions}</p>
-      <div ref={containerRef} id={elementId} style={{ width: "100%", maxWidth: 480, borderRadius: 8, overflow: "hidden" }} />
+      <div ref={containerRef} id={elementId} style={{ width: "100%", maxWidth: 480, borderRadius: "var(--radius-lg)", overflow: "hidden" }} />
       {rejectedValue && (
-        <p style={{ color: "#b00020", textAlign: "center" }}>
+        <p style={{ color: "var(--danger)", textAlign: "center" }}>
           Это не тот QR-код — попробуйте отсканировать нужный
         </p>
       )}

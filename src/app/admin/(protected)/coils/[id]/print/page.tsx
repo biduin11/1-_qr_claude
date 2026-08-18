@@ -29,10 +29,12 @@ export default async function CoilPrintPage({
         className="print-page"
         style={{
           maxWidth: 380,
-          border: "1px solid #ccc",
-          borderRadius: 8,
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-lg)",
           padding: "1.5rem",
           textAlign: "center",
+          backgroundColor: "var(--bg-card)",
+          color: "var(--text-primary)",
         }}
       >
         <h1 style={{ fontSize: "1.1rem", marginTop: 0 }}>Паспорт рулона</h1>
@@ -50,20 +52,20 @@ export default async function CoilPrintPage({
             marginTop: "1.5rem",
           }}
         >
-          <dt style={{ color: "#666" }}>Цвет</dt>
-          <dd style={{ margin: 0, textAlign: "right", fontWeight: 600 }}>RAL {coil.ral.code}</dd>
+          <dt style={{ color: "var(--text-secondary)" }}>Цвет</dt>
+          <dd style={{ margin: 0, textAlign: "right", fontWeight: 600, fontFamily: "var(--font-mono)" }}>RAL {coil.ral.code}</dd>
 
-          <dt style={{ color: "#666" }}>Толщина</dt>
-          <dd style={{ margin: 0, textAlign: "right", fontWeight: 600 }}>{coil.thickness.displayName}</dd>
+          <dt style={{ color: "var(--text-secondary)" }}>Толщина</dt>
+          <dd style={{ margin: 0, textAlign: "right", fontWeight: 600, fontFamily: "var(--font-mono)" }}>{coil.thickness.displayName}</dd>
 
-          <dt style={{ color: "#666" }}>Производитель</dt>
+          <dt style={{ color: "var(--text-secondary)" }}>Производитель</dt>
           <dd style={{ margin: 0, textAlign: "right", fontWeight: 600 }}>{coil.manufacturer.displayName}</dd>
 
-          <dt style={{ color: "#666" }}>Покрытие</dt>
+          <dt style={{ color: "var(--text-secondary)" }}>Покрытие</dt>
           <dd style={{ margin: 0, textAlign: "right", fontWeight: 600 }}>{coil.coating.displayName}</dd>
         </dl>
 
-        <p style={{ fontSize: "0.75rem", color: "#999", marginTop: "1rem", marginBottom: 0, wordBreak: "break-all" }}>
+        <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "1rem", marginBottom: 0, wordBreak: "break-all", fontFamily: "var(--font-mono)" }}>
           {coil.id}
         </p>
       </div>

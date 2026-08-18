@@ -10,8 +10,8 @@ export default async function AdminLoginPage() {
   }
 
   return (
-    <main style={{ maxWidth: 360, margin: "4rem auto", padding: "0 1rem" }}>
-      <h1>Вход в администрирование</h1>
+    <main style={{ minHeight: "100vh", maxWidth: 360, margin: "0 auto", padding: "4rem 1rem" }}>
+      <h1 style={{ fontSize: "1.4rem", color: "var(--text-primary)", textAlign: "center" }}>Вход в администрирование</h1>
       <LoginForm />
     </main>
   );

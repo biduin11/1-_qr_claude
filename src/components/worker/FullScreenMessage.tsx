@@ -1,3 +1,10 @@
+/**
+ * Полноэкранное сообщение рабочего flow.
+ * Иконка «✕» (Стоп/ошибка) получает --danger-strong, не обычный --danger —
+ * тот же принцип "не тише прежнего хардкода", что и в MatchScreen/
+ * MismatchScreen (см. комментарий у --danger-strong в globals.css).
+ * Размеры/отступы неизменны (ТЗ: результат читается за секунду).
+ */
 export function FullScreenMessage({
   icon,
   title,
@@ -20,7 +27,7 @@ export function FullScreenMessage({
         gap: "1rem",
       }}
     >
-      {icon && <div style={{ fontSize: "4rem", lineHeight: 1 }}>{icon}</div>}
+      {icon && <div style={{ fontSize: "4rem", lineHeight: 1, color: icon === "✕" ? "var(--danger-strong)" : undefined }}>{icon}</div>}
       <h1 style={{ fontSize: "2rem", margin: 0 }}>{title}</h1>
       {children}
     </main>

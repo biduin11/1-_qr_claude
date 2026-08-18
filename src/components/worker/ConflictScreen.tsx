@@ -31,10 +31,33 @@ export function ConflictScreen({
       <RequirementCard requirement={existing} />
       <p style={{ fontSize: "1.1rem" }}>Начать новую проверку вместо этой?</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", maxWidth: 480 }}>
-        <button type="button" onClick={onStartNew} style={{ fontSize: "1.25rem", padding: "1rem" }}>
+        <button
+          type="button"
+          onClick={onStartNew}
+          style={{
+            fontSize: "1.25rem",
+            fontWeight: 700,
+            padding: "1rem",
+            border: "none",
+            borderRadius: "var(--radius-lg)",
+            backgroundColor: "var(--brand-orange)",
+            color: "var(--on-accent)",
+          }}
+        >
           Начать новую
         </button>
-        <button type="button" onClick={onKeepExisting} style={{ fontSize: "1.25rem", padding: "1rem" }}>
+        <button
+          type="button"
+          onClick={onKeepExisting}
+          style={{
+            fontSize: "1.25rem",
+            padding: "1rem",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-lg)",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-primary)",
+          }}
+        >
           Продолжить текущую
         </button>
       </div>

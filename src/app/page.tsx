@@ -25,13 +25,15 @@ export default function HomePage() {
         href="/scan/invoice"
         style={{
           fontSize: "1.5rem",
+          fontWeight: 700,
           padding: "1.5rem 2rem",
           width: "100%",
           maxWidth: 480,
           textDecoration: "none",
-          border: "1px solid #333",
-          borderRadius: 8,
-          color: "inherit",
+          border: "none",
+          borderRadius: "var(--radius-lg)",
+          backgroundColor: "var(--brand-orange)",
+          color: "var(--on-accent)",
         }}
       >
         СКАНИРОВАТЬ НАКЛАДНУЮ

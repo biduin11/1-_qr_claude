@@ -14,9 +14,20 @@ export default function Error({
   }, [error]);
 
   return (
-    <main style={{ padding: "2rem", textAlign: "center" }}>
-      <h1>Что-то пошло не так</h1>
-      <button onClick={reset} style={{ fontSize: "1.2rem", padding: "0.75rem 1.5rem" }}>
+    <main style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "1.5rem", padding: "2rem", textAlign: "center" }}>
+      <h1 style={{ margin: 0 }}>Что-то пошло не так</h1>
+      <button
+        onClick={reset}
+        style={{
+          fontSize: "1.2rem",
+          fontWeight: 700,
+          padding: "0.75rem 1.5rem",
+          border: "none",
+          borderRadius: "var(--radius-lg)",
+          backgroundColor: "var(--brand-orange)",
+          color: "var(--on-accent)",
+        }}
+      >
         Повторить
       </button>
     </main>

@@ -38,12 +38,12 @@ function Row({ label, value }: { label: string; value: string }) {
       style={{
         display: "flex",
         justifyContent: "space-between",
-        borderBottom: "1px solid #eee",
+        borderBottom: "1px solid var(--border)",
         paddingBottom: "0.5rem",
       }}
     >
-      <dt style={{ color: "#666" }}>{label}</dt>
-      <dd style={{ margin: 0, fontWeight: 700 }}>{value}</dd>
+      <dt style={{ color: "var(--text-secondary)" }}>{label}</dt>
+      <dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{value}</dd>
     </div>
   );
 }

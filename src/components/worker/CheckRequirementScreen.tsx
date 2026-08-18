@@ -71,14 +71,16 @@ export function CheckRequirementScreen({ incoming }: { incoming: IncomingRequire
         href="/scan/coil"
         style={{
           fontSize: "1.5rem",
+          fontWeight: 700,
           padding: "1.25rem 2rem",
           width: "100%",
           maxWidth: 480,
           textAlign: "center",
           textDecoration: "none",
-          border: "1px solid #333",
-          borderRadius: 8,
-          color: "inherit",
+          border: "none",
+          borderRadius: "var(--radius-lg)",
+          backgroundColor: "var(--brand-orange)",
+          color: "var(--on-accent)",
         }}
       >
         СКАНИРОВАТЬ РУЛОН

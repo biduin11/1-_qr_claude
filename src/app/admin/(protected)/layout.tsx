@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { AdminNavLink } from "@/components/admin/AdminNavLink";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 import { getCurrentAdmin } from "@/lib/auth/session";
 
@@ -28,23 +28,54 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
         style={{
           width: 220,
           flexShrink: 0,
-          borderRight: "1px solid #ddd",
-          padding: "1rem",
+          backgroundColor: "var(--bg-sidebar)",
+          borderRight: "1px solid var(--border)",
+          padding: "1rem 0.75rem",
           display: "flex",
           flexDirection: "column",
-          gap: "0.5rem",
+          gap: "0.25rem",
         }}
       >
-        <strong>Контроль металла</strong>
-        <span style={{ fontSize: "0.85rem", color: "#666" }}>{admin.username}</span>
+        {/* Logo (как в fin-krovlya-header) */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.25rem 0.25rem 0.75rem",
+            borderBottom: "1px solid var(--border)",
+          }}
+        >
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: "var(--radius-md)",
+              backgroundColor: "var(--brand-primary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "var(--on-brand)",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              userSelect: "none",
+            }}
+          >
+            КМ
+          </div>
+          <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>Контроль металла</strong>
+        </div>
+
+        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", padding: "0.5rem 0.25rem 0.25rem" }}>
+          {admin.username}
+        </span>
+
         {NAV_ITEMS.map((item) => (
-          <Link key={item.href} href={item.href}>
-            {item.label}
-          </Link>
+          <AdminNavLink key={item.href} href={item.href} label={item.label} />
         ))}
         <LogoutButton />
       </nav>
-      <main style={{ flex: 1, padding: "1.5rem" }}>{children}</main>
+      <main style={{ flex: 1, padding: "1.5rem", minWidth: 0 }}>{children}</main>
     </div>
   );
 }

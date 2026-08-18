@@ -10,19 +10,192 @@ body {
   padding: 0;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Контроль металла · Design System
+   Единая тёмная/светлая тема на всё приложение (переключатель —
+   ThemeProvider/ThemeToggle, src/components/theme/). Токены —
+   единственный источник цвета; компоненты не хардкодят hex/rgb.
+
+   Активная тема — класс .light или .dark на <html> (ставится
+   синхронно в src/app/layout.tsx до отрисовки, чтобы не было
+   вспышки не той темы). :root дублирует .dark как безопасный
+   фолбэк (например, до отработки скрипта или без JS).
+───────────────────────────────────────────────────────────── */
+
+/* Токены, не зависящие от темы — форма радиусов и шрифтовые стеки. */
+:root {
+  --radius: 0.5rem;
+  --radius-lg: var(--radius); /* 8px */
+  --radius-md: calc(0.5rem - 2px); /* 6px */
+  --radius-sm: calc(0.5rem - 4px); /* 4px */
+
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
+
+  /* Тексты поверх заливок фирменных цветов — не меняются между темами
+     (--brand-primary и --brand-orange остаются достаточно контрастными
+     к белому/тёмному в обеих темах). */
+  --on-brand: #ffffff;
+  --on-accent: #161616;
+
+  --shadow-popover: 0 8px 24px -4px rgb(0 0 0 / 0.18), 0 2px 8px -2px rgb(0 0 0 / 0.12);
+}
+
+:root,
+.dark {
+  color-scheme: dark;
+
+  --bg-root: #161616;
+  --bg-card: #222222;
+  --bg-card-2: #2d2d2d;
+  --bg-sidebar: #0d0d0d;
+  --bg-header: #1c1c1c;
+
+  --brand-primary: #121193;
+  --brand-primary-soft: rgba(18, 17, 147, 0.18);
+  --brand-orange: #ff8518;
+  --brand-orange-soft: rgba(255, 133, 24, 0.14);
+  --brand-purple: #c45ec7;
+
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-muted: #555555;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  --success: #1d9e75;
+  --success-soft: rgba(29, 158, 117, 0.15);
+  --success-surface: rgba(29, 158, 117, 0.1);
+  --danger: #e05252;
+  --danger-soft: rgba(224, 82, 82, 0.15);
+  --danger-surface: rgba(224, 82, 82, 0.1);
+  --warning: #ff8518;
+
+  /* Усиленный вариант ТОЛЬКО для экранов МОЖНО/СТОП (иконка/заголовок/
+     итог) — раздел 41 ТЗ требует, чтобы результат читался мгновенно, и это
+     не то же самое, что "любой success/danger, подходящий по теме". Проверено
+     контрастом (WCAG): --success/--danger дают ~4.6:1 на своей surface-
+     подложке — ОК для мелких бейджей, но заметно слабее прежних хардкод-
+     значений (~7:1). --success-strong/--danger-strong держат исходный
+     уровень контраста, не понижая "громкость" вердикта при переходе на
+     тему. См. использование в MatchScreen/MismatchScreen/CheckErrorScreen/
+     FullScreenMessage. */
+  --success-strong: #33dd9c;
+  --danger-strong: #ff8a8a;
+
+  /* Ссылки/акцентные подписи поверх тёмных поверхностей — осветлённый
+     brand-primary, т.к. сам #121193 недостаточно контрастен как текст
+     на тёмном фоне. В светлой теме в этом нет нужды (см. .light). */
+  --link: #8584e8;
+
+  --background: var(--bg-root);
+  --foreground: var(--text-primary);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
+  --input: var(--bg-card-2);
+  --ring: var(--brand-primary);
+
+  --radius: 0.5rem;
+}
+
+.light {
+  color-scheme: light;
+
+  --bg-root: #f6f7fb;
+  --bg-card: #ffffff;
+  --bg-card-2: #f0f2f7;
+  --bg-sidebar: #111127;
+  --bg-header: #ffffff;
+
+  --brand-primary: #121193;
+  --brand-primary-soft: rgba(18, 17, 147, 0.1);
+  --brand-orange: #e66f00;
+  --brand-orange-soft: rgba(230, 111, 0, 0.1);
+  --brand-purple: #a944a6;
+
+  --text-primary: #151525;
+  --text-secondary: #606274;
+  --text-muted: #8b8d9b;
+  --border: rgba(21, 21, 37, 0.1);
+  --border-strong: rgba(21, 21, 37, 0.16);
+
+  --success: #13795b;
+  --success-soft: rgba(19, 121, 91, 0.12);
+  --success-surface: rgba(19, 121, 91, 0.07);
+  --danger: #c83d45;
+  --danger-soft: rgba(200, 61, 69, 0.12);
+  --danger-surface: rgba(200, 61, 69, 0.07);
+  --warning: #c45e00;
+
+  /* Калибровано под фактическую --success-surface/--danger-surface этой
+     темы, чтобы держать (не хуже) контраст исходных хардкод-значений первой
+     версии рабочих экранов (~5.3:1 / ~7.1:1 на белом) — та же логика, что и
+     в тёмной теме выше: МОЖНО/СТОП не должны становиться тише при переходе
+     на токены темы. */
+  --success-strong: #0f5f47;
+  --danger-strong: #911919;
+
+  /* Sidebar в светлой теме остаётся тёмным (--bg-sidebar), поэтому текст
+     ссылок на нём калибруется как в тёмной теме — см. AdminNavLink. Вне
+     сайдбара (светлые поверхности) сам brand-primary уже достаточно
+     контрастен как текст. */
+  --link: var(--brand-primary);
+
+  --background: var(--bg-root);
+  --foreground: var(--text-primary);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-primary);
+  --input: var(--bg-card-2);
+  --ring: var(--brand-primary);
+
+  --radius: 0.5rem;
+}
+
+html,
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  color: #111;
-  background: #fff;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Числа, коды, время, артикулы — везде моноширинный Geist Mono. */
+.mono,
+code,
+kbd {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background-color: var(--brand-primary-soft);
+}
+
+/* Чёткое, но аккуратное кольцо фокуса поверх любой темы. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-root);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
 }
 
 /* Паспорт рулона для печати (Iteration 8, раздел 15 ТЗ) — скрывает
-   admin-навигацию/кнопки при печати, оставляя только сам "паспорт". */
+   навигацию/кнопки при печати, а сам паспорт всегда печатается на белом,
+   вне зависимости от активной темы на экране (бумага не бывает тёмной). */
 @media print {
   .no-print {
     display: none !important;
@@ -30,5 +203,19 @@ body {
 
   .print-page {
     page-break-inside: avoid;
+  }
+
+  :root,
+  .dark,
+  .light {
+    color-scheme: light;
+    --background: #ffffff;
+    --foreground: #111111;
+    --bg-card: #ffffff;
+    --bg-card-2: #f5f5f5;
+    --border: rgba(0, 0, 0, 0.15);
+    --text-primary: #111111;
+    --text-secondary: #555555;
+    --text-muted: #888888;
   }
 }
