@@ -1,8 +1,8 @@
 import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, RuntimeCaching, SerwistGlobalConfig } from "serwist";
-import { NetworkOnly, Serwist } from "serwist";
+import type { PrecacheEntry, RouteHandlerCallbackOptions, RuntimeCaching, SerwistGlobalConfig } from "serwist";
+import { ExpirationPlugin, NetworkFirst, NetworkOnly, Serwist } from "serwist";
 
-import { isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
+import { isCheckPagePath, isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
 
 // Проект типизируется под lib "dom" (см. tsconfig.json), а не "webworker" —
 // они конфликтуют при совместном включении, поэтому вместо полного
@@ -46,20 +46,77 @@ const coilPageNetworkOnly: RuntimeCaching = {
   handler: new NetworkOnly(),
 };
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * `NetworkFirst` из serwist делает РОВНО одну попытку сети: если она падает
+ * и в кэше нет записи — бросает исключение (см. JSDoc класса в
+ * node_modules/serwist: "If the network request fails, and there is no
+ * cache match, this will throw"). Для большинства страниц это не проблема —
+ * они уже открывались раньше, кэш есть. Но `/check` почти всегда открывается
+ * ВПЕРВЫЕ именно с этими query-параметрами (у каждой накладной свои,
+ * QR из 1С не переиспользует URL), то есть кэша заведомо нет —
+ * единственный сетевой сбой сразу превращается в голую ошибку браузера
+ * ("This page couldn't load") вместо экрана приложения. Тот же класс бага,
+ * что был у `/coil/:id` (ARCHITECTURE.md §15, запись от 2026-08-14), но
+ * NetworkOnly здесь не подходит — раздел 39 ТЗ требует, чтобы `/check`
+ * оставался доступен офлайн по кэшированным справочникам. Вместо этого —
+ * до 3 попыток сети (с паузой между ними) перед тем, как разрешить обычному
+ * NetworkFirst откатиться в кэш на последней попытке. Если реально офлайн и
+ * кэш для этого URL уже есть — он отдаётся сразу на 1-й попытке, ретраи не
+ * нужны и не задействуются.
+ */
+async function checkPageNetworkFirstWithRetry(options: RouteHandlerCallbackOptions): Promise<Response> {
+  const strategy = new NetworkFirst({
+    // Тот же кэш, что и общее HTML-навигационное правило ниже (PAGES_CACHE_NAME.html
+    // в @serwist/next/worker) — /check не должен жить в отдельном кэше от
+    // остальных страниц.
+    cacheName: "pages",
+    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: 1440 * 60 })],
+    networkTimeoutSeconds: 4,
+  });
+
+  const ATTEMPTS = 3;
+  const RETRY_DELAY_MS = 400;
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    if (attempt > 1) {
+      await delay(RETRY_DELAY_MS);
+    }
+    try {
+      return await strategy.handle(options);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError;
+}
+
+const checkPageResilient: RuntimeCaching = {
+  matcher: ({ sameOrigin, url }) => sameOrigin && isCheckPagePath(url.pathname),
+  method: "GET",
+  handler: checkPageNetworkFirstWithRetry,
+};
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: true,
   // Остальное (app shell: JS/CSS/шрифты/иконки — CacheFirst; HTML-навигация
-  // `/`, `/check` и т.п. — NetworkFirst с кэш-фоллбэком) — это `defaultCache`
-  // из `@serwist/next/worker`, штатный набор стратегий под Next.js.
-  // Отдельного публичного API для справочников (Color/Thickness/
-  // Manufacturer/Coating) в проекте нет — `/check` разрешает их server-side
-  // и встраивает в SSR-HTML (Iteration 5), поэтому кэш HTML-навигации
-  // `/check` уже покрывает офлайн-требование "справочники доступны офлайн"
-  // без отдельного JSON-эндпоинта (см. Decision Log, запись Iteration 7).
-  runtimeCaching: [coilApiNetworkOnly, coilPageNetworkOnly, ...defaultCache],
+  // и т.п.) — это `defaultCache` из `@serwist/next/worker`, штатный набор
+  // стратегий под Next.js. Отдельного публичного API для справочников
+  // (Color/Thickness/Manufacturer/Coating) в проекте нет — `/check`
+  // разрешает их server-side и встраивает в SSR-HTML (Iteration 5), поэтому
+  // кэш HTML-навигации `/check` (через `checkPageResilient` выше, не общее
+  // правило `defaultCache` — см. его комментарий) уже покрывает офлайн-
+  // требование "справочники доступны офлайн" без отдельного JSON-эндпоинта
+  // (см. Decision Log, запись Iteration 7).
+  runtimeCaching: [coilApiNetworkOnly, coilPageNetworkOnly, checkPageResilient, ...defaultCache],
 });
 
 serwist.addEventListeners();

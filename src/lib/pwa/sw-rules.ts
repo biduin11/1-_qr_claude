@@ -24,3 +24,15 @@ export function isCoilVerdictApiPath(pathname: string): boolean {
 export function isCoilPagePath(pathname: string): boolean {
   return /^\/coil\/[^/]+\/?$/.test(pathname);
 }
+
+/**
+ * Страница `/check` — не сама по себе network-only (см. `checkPageResilient`
+ * в `src/app/sw.ts`), но матчер для неё нужен отдельно от общего
+ * HTML-навигационного правила `defaultCache`, чтобы поставить перед ним
+ * правило с ретраями. Раздел 39 ТЗ требует офлайн-доступ к /check по
+ * кэшированным справочникам — NetworkOnly (как у /coil/:id) здесь не
+ * подходит принципиально, не просто "ещё не сделали".
+ */
+export function isCheckPagePath(pathname: string): boolean {
+  return /^\/check\/?$/.test(pathname);
+}

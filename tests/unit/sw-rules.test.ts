@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
+import { isCheckPagePath, isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
 
 describe("isCoilVerdictApiPath", () => {
   it("распознаёт /api/coil/:id — маршрут, который service worker обязан отдавать строго network-only (ARCHITECTURE.md §9)", () => {
@@ -35,5 +35,22 @@ describe("isCoilPagePath", () => {
     expect(isCoilPagePath("/scan/coil")).toBe(false);
     expect(isCoilPagePath("/coil")).toBe(false);
     expect(isCoilPagePath("/check")).toBe(false);
+  });
+});
+
+describe("isCheckPagePath", () => {
+  it("распознаёт /check — почти каждый визит первый (у каждой накладной свои query-параметры), поэтому кэш заведомо пуст", () => {
+    expect(isCheckPagePath("/check")).toBe(true);
+  });
+
+  it("допускает завершающий слэш", () => {
+    expect(isCheckPagePath("/check/")).toBe(true);
+  });
+
+  it("не совпадает с соседними путями", () => {
+    expect(isCheckPagePath("/coil/abc123")).toBe(false);
+    expect(isCheckPagePath("/api/check")).toBe(false);
+    expect(isCheckPagePath("/checkup")).toBe(false);
+    expect(isCheckPagePath("/scan/invoice")).toBe(false);
   });
 });
