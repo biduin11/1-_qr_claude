@@ -18,7 +18,10 @@ export function RequirementCard({
         display: "grid",
         gridTemplateColumns: "1fr",
         gap: "0.75rem",
-        fontSize: "1.5rem",
+        // --text-7, не --text-6 (как в аналогичной по структуре
+        // CoilReadOnlyCard) — здесь то, что работник должен найти, а не
+        // пассивный просмотр уже найденного; сохраняет более крупный акцент.
+        fontSize: "var(--text-7)",
         width: "100%",
         maxWidth: 480,
         margin: "0 auto",

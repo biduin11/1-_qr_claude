@@ -20,7 +20,7 @@ export default function ScanCoilPage() {
         gap: "1rem",
       }}
     >
-      <h1 style={{ fontSize: "1.5rem", margin: 0 }}>Сканирование рулона</h1>
+      <h1 style={{ fontSize: "var(--text-7)", margin: 0 }}>Сканирование рулона</h1>
       <QrScannerView
         instructions="Наведите камеру на QR-код на рулоне"
         validate={(raw) => parseCoilScanUrl(raw, window.location.origin) !== null}

@@ -11,7 +11,9 @@ export default async function AdminLoginPage() {
 
   return (
     <main style={{ minHeight: "100vh", maxWidth: 360, margin: "0 auto", padding: "4rem 1rem" }}>
-      <h1 style={{ fontSize: "1.4rem", color: "var(--text-primary)", textAlign: "center" }}>Вход в администрирование</h1>
+      {/* 1.5rem (--text-7) — совпадает с h1 остальных страниц админки
+          (было изолированное 1.4rem только тут, аудит «Типографика»). */}
+      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", textAlign: "center" }}>Вход в администрирование</h1>
       <LoginForm />
     </main>
   );

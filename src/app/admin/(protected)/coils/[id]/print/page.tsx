@@ -37,7 +37,7 @@ export default async function CoilPrintPage({
           color: "var(--text-primary)",
         }}
       >
-        <h1 style={{ fontSize: "1.1rem", marginTop: 0 }}>Паспорт рулона</h1>
+        <h1 style={{ fontSize: "var(--text-5)", marginTop: 0 }}>Паспорт рулона</h1>
 
         {/* Собственный серверный SVG (src/lib/qr/coil-passport.ts), не пользовательский ввод. */}
         <div style={{ width: 220, margin: "0 auto" }} dangerouslySetInnerHTML={{ __html: qrSvg }} />
@@ -47,7 +47,7 @@ export default async function CoilPrintPage({
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             rowGap: "0.5rem",
-            fontSize: "1rem",
+            fontSize: "var(--text-4)",
             textAlign: "left",
             marginTop: "1.5rem",
           }}
@@ -65,7 +65,7 @@ export default async function CoilPrintPage({
           <dd style={{ margin: 0, textAlign: "right", fontWeight: 600 }}>{coil.coating.displayName}</dd>
         </dl>
 
-        <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "1rem", marginBottom: 0, wordBreak: "break-all", fontFamily: "var(--font-mono)" }}>
+        <p style={{ fontSize: "var(--text-1)", color: "var(--text-muted)", marginTop: "1rem", marginBottom: 0, wordBreak: "break-all", fontFamily: "var(--font-mono)" }}>
           {coil.id}
         </p>
       </div>

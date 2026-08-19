@@ -19,7 +19,7 @@ export function AdminNavLink({ href, label }: { href: string; label: string }) {
         color: active ? "var(--link)" : "var(--text-secondary)",
         backgroundColor: active ? "rgba(18,17,147,0.25)" : "transparent",
         textDecoration: "none",
-        fontSize: "0.9rem",
+        fontSize: "var(--text-3)",
         fontWeight: active ? 600 : 400,
         padding: "0.55rem 0.75rem",
         borderRadius: "var(--radius-md)",

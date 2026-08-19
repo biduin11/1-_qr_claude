@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties } from "react";
+
+import { AdminButton } from "@/components/admin/AdminButton";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 type PreviewRow =
   | { rowNumber: number; status: "valid"; colorId: string; thicknessId: string; manufacturerId: string; coatingId: string }
@@ -21,35 +23,6 @@ type ConfirmResponse = {
 };
 
 type ApiErrorBody = { error?: { message?: string } };
-
-function StatusBadge({ ok }: { ok: boolean }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "0.375rem",
-        borderRadius: "999px",
-        padding: "0.2rem 0.55rem",
-        fontSize: "0.7rem",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {ok ? (
-        <>
-          <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--success)" }} />
-          <span style={{ color: "var(--success)" }}>Корректна</span>
-        </>
-      ) : (
-        <>
-          <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--danger)" }} />
-          <span style={{ color: "var(--danger)" }}>Ошибка</span>
-        </>
-      )}
-    </span>
-  );
-}
 
 export function ExcelImportManager() {
   const [file, setFile] = useState<File | null>(null);
@@ -128,7 +101,7 @@ export function ExcelImportManager() {
 
   return (
     <div style={{ maxWidth: 960 }}>
-      <h1 style={{ fontSize: "1.5rem", color: "var(--text-primary)", margin: "0 0 0.75rem" }}>Импорт рулонов из Excel</h1>
+      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 0.75rem" }}>Импорт рулонов из Excel</h1>
       <p style={{ color: "var(--text-secondary)", marginTop: 0 }}>
         <a href="/api/admin/export/excel-template" style={{ color: "var(--link)" }}>
           Скачать шаблон (.xlsx)
@@ -142,9 +115,9 @@ export function ExcelImportManager() {
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           style={{ color: "var(--text-secondary)" }}
         />
-        <button type="button" onClick={handleUpload} disabled={!file || uploading} style={{ ...buttonStyle, backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}>
+        <AdminButton type="button" variant="primary" onClick={handleUpload} disabled={!file || uploading} style={{ padding: "0.45rem 1.1rem", borderRadius: "var(--radius-md)" }}>
           {uploading ? "Загрузка…" : "Загрузить и проверить"}
-        </button>
+        </AdminButton>
       </div>
 
       {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
@@ -156,24 +129,24 @@ export function ExcelImportManager() {
             {preview.invalidRows}
           </p>
           <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden", backgroundColor: "var(--bg-card)", marginBottom: "1rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", padding: "0.65rem 1rem", backgroundColor: "var(--bg-header)", color: "var(--text-muted)", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>
-              <span>Строка</span>
+            <div style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", padding: "0.65rem 1rem", backgroundColor: "var(--bg-header)", color: "var(--text-muted)", fontSize: "var(--text-1)", fontWeight: 600, textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>
+              <span style={{ textAlign: "right" }}>Строка</span>
               <span>Статус</span>
               <span>Детали</span>
             </div>
             {preview.rows.map((row, i) => (
-              <div key={row.rowNumber} style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", alignItems: "center", padding: "0.55rem 1rem", backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)", borderBottom: "1px solid var(--border)", fontSize: "0.9rem" }}>
-                <span style={{ color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>{row.rowNumber}</span>
-                <StatusBadge ok={row.status === "valid"} />
+              <div key={row.rowNumber} style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", alignItems: "center", padding: "0.55rem 1rem", backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)", borderBottom: "1px solid var(--border)", fontSize: "var(--text-3)" }}>
+                <span style={{ color: "var(--text-secondary)", fontFamily: "var(--font-mono)", textAlign: "right" }}>{row.rowNumber}</span>
+                <StatusPill tone={row.status === "valid" ? "success" : "danger"} label={row.status === "valid" ? "Корректна" : "Ошибка"} />
                 <span style={{ color: row.status === "invalid" ? "var(--danger)" : "var(--text-secondary)" }}>
                   {row.status === "invalid" ? row.errors.join("; ") : "—"}
                 </span>
               </div>
             ))}
           </div>
-          <button type="button" onClick={handleConfirm} disabled={confirming || preview.validRows === 0} style={{ ...buttonStyle, backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}>
+          <AdminButton type="button" variant="primary" onClick={handleConfirm} disabled={confirming || preview.validRows === 0} style={{ padding: "0.45rem 1.1rem", borderRadius: "var(--radius-md)" }}>
             {confirming ? "Импорт…" : `Импортировать (${preview.validRows})`}
-          </button>
+          </AdminButton>
         </div>
       )}
 
@@ -194,13 +167,3 @@ export function ExcelImportManager() {
     </div>
   );
 }
-
-const buttonStyle: CSSProperties = {
-  padding: "0.45rem 1.1rem",
-  borderRadius: "var(--radius-md)",
-  backgroundColor: "var(--bg-card-2)",
-  border: "1px solid var(--border)",
-  color: "var(--text-secondary)",
-  cursor: "pointer",
-  fontSize: "0.85rem",
-};

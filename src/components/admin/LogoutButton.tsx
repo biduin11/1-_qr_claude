@@ -31,7 +31,7 @@ export function LogoutButton() {
         background: "transparent",
         border: "none",
         cursor: "pointer",
-        fontSize: "0.9rem",
+        fontSize: "var(--text-3)",
         textAlign: "left",
         transition: "background-color 0.15s ease",
       }}

@@ -57,16 +57,16 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
               justifyContent: "center",
               color: "var(--on-brand)",
               fontWeight: 700,
-              fontSize: "0.75rem",
+              fontSize: "var(--text-1)",
               userSelect: "none",
             }}
           >
             КМ
           </div>
-          <strong style={{ fontSize: "0.9rem", color: "var(--text-primary)" }}>Контроль металла</strong>
+          <strong style={{ fontSize: "var(--text-3)", color: "var(--text-primary)" }}>Контроль металла</strong>
         </div>
 
-        <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", padding: "0.5rem 0.25rem 0.25rem" }}>
+        <span style={{ fontSize: "var(--text-2)", color: "var(--text-secondary)", padding: "0.5rem 0.25rem 0.25rem" }}>
           {admin.username}
         </span>
 

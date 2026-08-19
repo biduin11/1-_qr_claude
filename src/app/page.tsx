@@ -20,11 +20,11 @@ export default function HomePage() {
         textAlign: "center",
       }}
     >
-      <h1 style={{ fontSize: "2rem", margin: 0 }}>КОНТРОЛЬ МЕТАЛЛА</h1>
+      <h1 style={{ fontSize: "var(--text-9)", margin: 0 }}>КОНТРОЛЬ МЕТАЛЛА</h1>
       <Link
         href="/scan/invoice"
         style={{
-          fontSize: "1.5rem",
+          fontSize: "var(--text-7)",
           fontWeight: 700,
           padding: "1.5rem 2rem",
           width: "100%",

@@ -11,7 +11,7 @@ import type { FieldComparison } from "@/lib/worker/compare";
  * исходный уровень контраста в обеих темах (globals.css). Мягкая danger-
  * тонированная подложка (--danger-surface) вместо жёсткого #fff5f5 —
  * тот же принцип ("контрастность результата не менять"), через токены темы.
- * Размеры/отступы/кнопка (1.5rem) не меняются: результат читается за
+ * Размеры/отступы/кнопка (--text-7) не меняются: результат читается за
  * секунду, цвет — доп. сигнал (иконка ✕ и сам текст остаются).
  */
 export function MismatchScreen({
@@ -38,8 +38,8 @@ export function MismatchScreen({
         background: "var(--danger-surface)",
       }}
     >
-      <div style={{ fontSize: "4rem", lineHeight: 1, color: stopColor }}>✕</div>
-      <h1 style={{ fontSize: "1.75rem", margin: 0, color: stopColor }}>СТОП — РУЛОН НЕ ПОДХОДИТ</h1>
+      <div style={{ fontSize: "var(--text-icon)", lineHeight: 1, color: stopColor }}>✕</div>
+      <h1 style={{ fontSize: "var(--text-8)", margin: 0, color: stopColor }}>СТОП — РУЛОН НЕ ПОДХОДИТ</h1>
 
       <div style={{ width: "100%", maxWidth: 480, display: "grid", gap: "1rem" }}>
         {mismatches.map((comparison) => (
@@ -47,7 +47,12 @@ export function MismatchScreen({
             key={comparison.field}
             style={{ textAlign: "left", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "0.75rem 1rem" }}
           >
-            <strong style={{ fontSize: "1.1rem" }}>{comparison.label}</strong>
+            <strong style={{ fontSize: "var(--text-5)" }}>{comparison.label}</strong>
+            {/* "Нужно" — обычный текст, "На рулоне" — stopColor: осознанная
+                асимметрия, не забытое форматирование (аудит, «Визуальная
+                иерархия»). Акцент именно на фактическом (проблемном)
+                значении — это то, из-за чего рулон не подходит, "Нужно"
+                тут справочная информация, а не то, что должно кричать. */}
             <p style={{ margin: "0.25rem 0 0", fontFamily: "var(--font-mono)" }}>Нужно: {comparison.requiredDisplay}</p>
             <p style={{ margin: 0, color: stopColor, fontFamily: "var(--font-mono)" }}>На рулоне: {comparison.actualDisplay}</p>
           </div>
@@ -58,9 +63,9 @@ export function MismatchScreen({
         type="button"
         onClick={onScanAnother}
         style={{
-          fontSize: "1.5rem",
+          fontSize: "var(--text-7)",
           fontWeight: 700,
-          padding: "1.25rem 2rem",
+          padding: "1.5rem 2rem",
           width: "100%",
           maxWidth: 480,
           border: "none",

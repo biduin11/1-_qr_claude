@@ -14,8 +14,8 @@ export function CoilReadOnlyCard({ coil }: { coil: Pick<PublicCoil, "ral" | "thi
       }}
     >
       <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
-        <h1 style={{ fontSize: "1.5rem", marginBottom: "1.5rem" }}>Рулон</h1>
-        <dl style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: "1rem", fontSize: "1.25rem" }}>
+        <h1 style={{ fontSize: "var(--text-7)", marginBottom: "1.5rem" }}>Рулон</h1>
+        <dl style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: "1rem", fontSize: "var(--text-6)" }}>
           <dt style={{ textAlign: "left", color: "var(--text-secondary)" }}>Цвет</dt>
           <dd style={{ textAlign: "right", margin: 0, fontWeight: 600, fontFamily: "var(--font-mono)" }}>RAL {coil.ral.code}</dd>
 

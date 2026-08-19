@@ -65,14 +65,14 @@ export function CheckRequirementScreen({ incoming }: { incoming: IncomingRequire
         gap: "1.5rem",
       }}
     >
-      <h1 style={{ fontSize: "1.75rem", margin: 0 }}>ТРЕБУЕТСЯ РУЛОН</h1>
+      <h1 style={{ fontSize: "var(--text-8)", margin: 0 }}>ТРЕБУЕТСЯ РУЛОН</h1>
       <RequirementCard requirement={displayed} />
       <Link
         href="/scan/coil"
         style={{
-          fontSize: "1.5rem",
+          fontSize: "var(--text-7)",
           fontWeight: 700,
-          padding: "1.25rem 2rem",
+          padding: "1.5rem 2rem",
           width: "100%",
           maxWidth: 480,
           textAlign: "center",

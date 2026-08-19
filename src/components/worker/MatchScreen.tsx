@@ -9,8 +9,15 @@ import type { FieldComparison } from "@/lib/worker/compare";
  * исходный уровень контраста в обеих темах (globals.css). Мягкая success-
  * тонированная подложка (--success-surface) вместо жёсткого #f0fff4 —
  * тот же принцип ("контрастность результата не менять"), через токены темы.
- * Размеры/отступы/кнопка (1.5rem) неизменны; цвет — доп. сигнал к иконке ✓
+ * Размеры/отступы/кнопка (--text-7) неизменны; цвет — доп. сигнал к иконке ✓
  * и крупному тексту, не единственный.
+ *
+ * Заголовок и "МОЖНО ИСПОЛЬЗОВАТЬ" раньше были почти равны по весу (оба
+ * жирные, разница в размере всего 0.25rem) — читались как два конкурирующих
+ * заголовка (аудит, «Визуальная иерархия»). h1 намеренно жирнее (800) —
+ * не трогая ни размеры, ни цвет/контраст итоговой фразы (это и так самый
+ * заметный результат экрана), а просто закрепляя, что заголовок — вершина
+ * иерархии, а не второй такой же по весу элемент.
  */
 export function MatchScreen({
   comparisons,
@@ -37,10 +44,10 @@ export function MatchScreen({
         background: "var(--success-surface)",
       }}
     >
-      <div style={{ fontSize: "4rem", lineHeight: 1, color: okColor }}>✓</div>
-      <h1 style={{ fontSize: "1.75rem", margin: 0 }}>РУЛОН ПОДХОДИТ</h1>
+      <div style={{ fontSize: "var(--text-icon)", lineHeight: 1, color: okColor }}>✓</div>
+      <h1 style={{ fontSize: "var(--text-8)", fontWeight: 800, margin: 0 }}>РУЛОН ПОДХОДИТ</h1>
 
-      <dl style={{ width: "100%", maxWidth: 480, display: "grid", gap: "0.5rem", fontSize: "1.25rem" }}>
+      <dl style={{ width: "100%", maxWidth: 480, display: "grid", gap: "0.5rem", fontSize: "var(--text-6)" }}>
         {comparisons.map((comparison) => (
           <div
             key={comparison.field}
@@ -54,16 +61,16 @@ export function MatchScreen({
         ))}
       </dl>
 
-      <p style={{ fontSize: "1.5rem", fontWeight: 700, color: okColor, margin: 0 }}>МОЖНО ИСПОЛЬЗОВАТЬ</p>
+      <p style={{ fontSize: "var(--text-7)", fontWeight: 700, color: okColor, margin: 0 }}>МОЖНО ИСПОЛЬЗОВАТЬ</p>
 
       <button
         type="button"
         onClick={onFinish}
         disabled={finishing}
         style={{
-          fontSize: "1.5rem",
+          fontSize: "var(--text-7)",
           fontWeight: 700,
-          padding: "1.25rem 2rem",
+          padding: "1.5rem 2rem",
           width: "100%",
           maxWidth: 480,
           border: "none",

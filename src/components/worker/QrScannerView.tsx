@@ -109,7 +109,15 @@ export function QrScannerView({
       type="button"
       onClick={onCancel}
       style={{
-        padding: "0.5rem 1rem",
+        // Раньше 0.5rem 1rem без явного fontSize — заметно мельче остальных
+        // рабочих экранов. Это единственное действие на экране сканирования
+        // кроме самой камеры (в т.ч. первое, что нужно нажать, если камера
+        // не дала доступ) — увеличено (аудит, «Соответствие контексту
+        // использования»), но осознанно меньше главного CTA (--text-7):
+        // это второстепенное действие "назад", не главное на экране.
+        padding: "0.75rem 1.5rem",
+        fontSize: "var(--text-5)",
+        fontWeight: 600,
         alignSelf: "flex-start",
         border: "1px solid var(--border)",
         borderRadius: "var(--radius-md)",
@@ -126,7 +134,7 @@ export function QrScannerView({
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "2rem" }}>
         {cancelButton}
         <div style={{ textAlign: "center" }}>
-          <p style={{ color: "var(--danger)", fontSize: "1.1rem" }}>Не удалось получить доступ к камере</p>
+          <p style={{ color: "var(--danger)", fontSize: "var(--text-5)" }}>Не удалось получить доступ к камере</p>
           <p style={{ color: "var(--text-secondary)" }}>{cameraError}</p>
         </div>
       </div>
@@ -136,7 +144,7 @@ export function QrScannerView({
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
       {cancelButton}
-      <p style={{ fontSize: "1.1rem", textAlign: "center" }}>{instructions}</p>
+      <p style={{ fontSize: "var(--text-5)", textAlign: "center" }}>{instructions}</p>
       <div ref={containerRef} id={elementId} style={{ width: "100%", maxWidth: 480, borderRadius: "var(--radius-lg)", overflow: "hidden" }} />
       {rejectedValue && (
         <p style={{ color: "var(--danger)", textAlign: "center" }}>

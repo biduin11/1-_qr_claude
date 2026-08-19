@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { CSSProperties, FormEvent } from "react";
+import type { FormEvent } from "react";
+
+import { AdminButton } from "@/components/admin/AdminButton";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 type FieldConfig =
   | { type: "text"; name: string; label: string }
@@ -47,6 +50,13 @@ function formatValue(field: FieldConfig, value: unknown): string {
 
 function itemToFormState(fields: FieldConfig[], item: ReferenceItem): Record<string, string> {
   return Object.fromEntries(fields.map((field) => [field.name, formatValue(field, item[field.name])]));
+}
+
+/** `code`/числовые поля — единственные "чисто технические" колонки в этих
+ * таблицах (аудит: displayName/aliases — составные строки, их выравнивание
+ * по правому краю только мешало бы читать). */
+function isTechnicalField(field: FieldConfig): boolean {
+  return field.type === "number" || field.name === "code";
 }
 
 export function ReferenceDataManager({
@@ -179,7 +189,7 @@ export function ReferenceDataManager({
 
   return (
     <div style={{ maxWidth: 900 }}>
-      <h1 style={{ fontSize: "1.5rem", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>{title}</h1>
+      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>{title}</h1>
 
       <form
         onSubmit={handleSubmit}
@@ -203,7 +213,7 @@ export function ReferenceDataManager({
                 ? "через запятую, необязательно"
                 : null;
           return (
-            <label key={field.name} style={{ display: "flex", flexDirection: "column", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+            <label key={field.name} style={{ display: "flex", flexDirection: "column", fontSize: "var(--text-2)", color: "var(--text-secondary)" }}>
               {field.label}
               <input
                 type={field.type === "number" ? "number" : "text"}
@@ -212,11 +222,11 @@ export function ReferenceDataManager({
                 required={field.type !== "aliases"}
                 style={{ marginTop: "0.25rem", padding: "0.4rem 0.5rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
               />
-              {/* Подпись всегда занимает строку (даже пустая,  ) — иначе
-                  поля без подписи (например "Название") короче полей с ней
-                  ("Варианты написания"), и высота полей в ряду
-                  расходится, и кнопка "Добавить" встаёт не туда. */}
-              <span style={{ color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "0.2rem" }}>{caption ?? " "}</span>
+              {/* Подпись всегда занимает строку, даже пустая — иначе поля
+                  без неё ("Название") короче полей с ней ("Варианты
+                  написания"), и высота полей в ряду расходится, и кнопка
+                  "Добавить" встаёт не туда. */}
+              <span style={{ color: "var(--text-muted)", fontSize: "var(--text-1)", marginTop: "0.2rem" }}>{caption ?? " "}</span>
             </label>
           );
         })}
@@ -224,16 +234,12 @@ export function ReferenceDataManager({
             подпись поля над инпутом — при alignItems:flex-start кнопка
             встаёт вровень с инпутами, а не с их подписями. */}
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <span aria-hidden style={{ fontSize: "0.85rem", visibility: "hidden" }}>
+          <span aria-hidden style={{ fontSize: "var(--text-2)", visibility: "hidden" }}>
             &nbsp;
           </span>
-          <button
-            type="submit"
-            disabled={submitting}
-            style={{ ...buttonStyle, marginTop: "0.25rem", backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}
-          >
+          <AdminButton type="submit" variant="primary" disabled={submitting} style={{ marginTop: "0.25rem" }}>
             Добавить
-          </button>
+          </AdminButton>
         </div>
       </form>
       {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
@@ -264,20 +270,22 @@ export function ReferenceDataManager({
               padding: "0.65rem 1rem",
               backgroundColor: "var(--bg-header)",
               color: "var(--text-muted)",
-              fontSize: "0.75rem",
+              fontSize: "var(--text-1)",
               fontWeight: 600,
               textTransform: "uppercase",
               borderBottom: "1px solid var(--border)",
             }}
           >
             {fields.map((field) => (
-              <span key={field.name}>{field.label}</span>
+              <span key={field.name} style={{ textAlign: isTechnicalField(field) ? "right" : undefined }}>
+                {field.label}
+              </span>
             ))}
             <span>Статус</span>
             <span />
           </div>
           {items.length === 0 && (
-            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "var(--text-3)" }}>
               Нет записей
             </div>
           )}
@@ -293,13 +301,13 @@ export function ReferenceDataManager({
                     padding: "0.6rem 1rem",
                     backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
                     borderBottom: isEditing && editError ? "none" : "1px solid var(--border)",
-                    fontSize: "0.9rem",
+                    fontSize: "var(--text-3)",
                   }}
                 >
                   {fields.map((field) => {
-                    const isTechnical = field.type === "number" || field.name === "code";
+                    const isTechnical = isTechnicalField(field);
                     return (
-                      <span key={field.name} style={{ color: "var(--text-secondary)" }}>
+                      <span key={field.name} style={{ color: "var(--text-secondary)", textAlign: isTechnical ? "right" : undefined }}>
                         {isEditing ? (
                           <input
                             type={field.type === "number" ? "number" : "text"}
@@ -312,8 +320,9 @@ export function ReferenceDataManager({
                               border: "1px solid var(--border)",
                               borderRadius: "var(--radius-sm)",
                               color: "var(--text-primary)",
-                              fontSize: "0.85rem",
+                              fontSize: "var(--text-2)",
                               fontFamily: isTechnical ? "var(--font-mono)" : undefined,
+                              textAlign: isTechnical ? "right" : undefined,
                             }}
                           />
                         ) : (
@@ -325,31 +334,24 @@ export function ReferenceDataManager({
                     );
                   })}
                   <span>
-                    <StatusPill active={item.active} />
+                    <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активна" : "Неактивна"} />
                   </span>
                   <span style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                     {isEditing ? (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => submitEdit(item.id)}
-                          disabled={editSubmitting}
-                          style={{ ...buttonStyle, backgroundColor: "var(--brand-primary)", color: "var(--on-brand)" }}
-                        >
+                        <AdminButton type="button" variant="primary" onClick={() => submitEdit(item.id)} disabled={editSubmitting}>
                           Сохранить
-                        </button>
-                        <button type="button" onClick={cancelEdit} disabled={editSubmitting} style={buttonStyle}>
+                        </AdminButton>
+                        <AdminButton type="button" onClick={cancelEdit} disabled={editSubmitting}>
                           Отмена
-                        </button>
+                        </AdminButton>
                       </>
                     ) : (
                       <>
-                        <button type="button" onClick={() => startEdit(item)} style={buttonStyle}>
-                          Изменить
-                        </button>
-                        <button type="button" onClick={() => toggleActive(item.id, !item.active)} style={buttonStyle}>
+                        <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
+                        <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
                           {item.active ? "Деактивировать" : "Восстановить"}
-                        </button>
+                        </AdminButton>
                       </>
                     )}
                   </span>
@@ -361,7 +363,7 @@ export function ReferenceDataManager({
                       backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
                       borderBottom: "1px solid var(--border)",
                       color: "var(--danger)",
-                      fontSize: "0.8rem",
+                      fontSize: "var(--text-2)",
                     }}
                   >
                     {editError}
@@ -375,30 +377,3 @@ export function ReferenceDataManager({
     </div>
   );
 }
-
-function StatusPill({ active }: { active: boolean }) {
-  if (active) {
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", borderRadius: "999px", padding: "0.2rem 0.55rem", fontSize: "0.7rem", fontWeight: 600, backgroundColor: "var(--success-soft)", color: "var(--success)" }}>
-        <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--success)" }} />
-        Активна
-      </span>
-    );
-  }
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", borderRadius: "999px", padding: "0.2rem 0.55rem", fontSize: "0.7rem", fontWeight: 600, backgroundColor: "var(--danger-soft)", color: "var(--danger)" }}>
-      <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--danger)" }} />
-      Неактивна
-    </span>
-  );
-}
-
-const buttonStyle: CSSProperties = {
-  padding: "0.35rem 0.8rem",
-  borderRadius: "var(--radius-sm)",
-  backgroundColor: "var(--bg-card-2)",
-  border: "1px solid var(--border)",
-  color: "var(--text-secondary)",
-  cursor: "pointer",
-  fontSize: "0.8rem",
-};

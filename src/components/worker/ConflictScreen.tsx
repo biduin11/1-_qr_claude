@@ -4,6 +4,12 @@ import type { ActiveMaterialRequirement } from "@/lib/worker/active-requirement"
 /**
  * Раздел 6 ТЗ («уточнение поведения»): открытие /check при уже существующем
  * незавершённом требовании — не молчаливая перезапись, а явное подтверждение.
+ *
+ * Обе кнопки — того же размера (--text-7, padding 1.5rem 2rem), что и
+ * главный CTA на остальных рабочих экранах: раньше здесь было 1.25rem/1rem,
+ * заметно мельче (аудит, «Ритм и последовательность отступов»); различие
+ * между "главным" и "второстепенным" действием — только цветом (оранжевая
+ * заливка vs нейтральная обводка), не размером.
  */
 export function ConflictScreen({
   existing,
@@ -27,17 +33,17 @@ export function ConflictScreen({
         textAlign: "center",
       }}
     >
-      <h1 style={{ fontSize: "1.5rem", margin: 0 }}>Есть незавершённая проверка</h1>
+      <h1 style={{ fontSize: "var(--text-7)", margin: 0 }}>Есть незавершённая проверка</h1>
       <RequirementCard requirement={existing} />
-      <p style={{ fontSize: "1.1rem" }}>Начать новую проверку вместо этой?</p>
+      <p style={{ fontSize: "var(--text-5)" }}>Начать новую проверку вместо этой?</p>
       <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%", maxWidth: 480 }}>
         <button
           type="button"
           onClick={onStartNew}
           style={{
-            fontSize: "1.25rem",
+            fontSize: "var(--text-7)",
             fontWeight: 700,
-            padding: "1rem",
+            padding: "1.5rem 2rem",
             border: "none",
             borderRadius: "var(--radius-lg)",
             backgroundColor: "var(--brand-orange)",
@@ -50,8 +56,9 @@ export function ConflictScreen({
           type="button"
           onClick={onKeepExisting}
           style={{
-            fontSize: "1.25rem",
-            padding: "1rem",
+            fontSize: "var(--text-7)",
+            fontWeight: 700,
+            padding: "1.5rem 2rem",
             border: "1px solid var(--border)",
             borderRadius: "var(--radius-lg)",
             backgroundColor: "var(--bg-card)",

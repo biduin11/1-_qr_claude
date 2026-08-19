@@ -9,7 +9,7 @@ import { FullScreenMessage } from "@/components/worker/FullScreenMessage";
 export function CheckErrorScreen({ errors }: { errors: string[] }) {
   return (
     <FullScreenMessage icon="✕" title="ОШИБКА В НАКЛАДНОЙ">
-      <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: "1.1rem", color: "var(--danger-strong)" }}>
+      <ul style={{ listStyle: "none", padding: 0, margin: 0, fontSize: "var(--text-5)", color: "var(--danger-strong)" }}>
         {errors.map((error) => (
           <li key={error}>{error}</li>
         ))}

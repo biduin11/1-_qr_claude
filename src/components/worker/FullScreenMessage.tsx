@@ -27,8 +27,8 @@ export function FullScreenMessage({
         gap: "1rem",
       }}
     >
-      {icon && <div style={{ fontSize: "4rem", lineHeight: 1, color: icon === "✕" ? "var(--danger-strong)" : undefined }}>{icon}</div>}
-      <h1 style={{ fontSize: "2rem", margin: 0 }}>{title}</h1>
+      {icon && <div style={{ fontSize: "var(--text-icon)", lineHeight: 1, color: icon === "✕" ? "var(--danger-strong)" : undefined }}>{icon}</div>}
+      <h1 style={{ fontSize: "var(--text-9)", margin: 0 }}>{title}</h1>
       {children}
     </main>
   );

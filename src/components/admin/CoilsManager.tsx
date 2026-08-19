@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { CSSProperties, FormEvent } from "react";
+import type { FormEvent } from "react";
+
+import { AdminButton } from "@/components/admin/AdminButton";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 type RefOption = { id: string; displayName: string };
 
@@ -52,7 +55,7 @@ function RefSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label style={{ display: "flex", flexDirection: "column", fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+    <label style={{ display: "flex", flexDirection: "column", fontSize: "var(--text-2)", color: "var(--text-secondary)" }}>
       {label}
       <select
         value={value}
@@ -70,34 +73,6 @@ function RefSelect({
         ))}
       </select>
     </label>
-  );
-}
-
-/** Плашка статуса рулона — цвет из палитры источника (--success / --danger). */
-function StatusPill({ active }: { active: boolean }) {
-  const base: CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "0.375rem",
-    borderRadius: "999px",
-    padding: "0.25rem 0.6rem",
-    fontSize: "0.7rem",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  };
-  if (active) {
-    return (
-      <span style={{ ...base, backgroundColor: "var(--success-soft)", color: "var(--success)" }}>
-        <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--success)" }} />
-        Активен
-      </span>
-    );
-  }
-  return (
-    <span style={{ ...base, backgroundColor: "var(--danger-soft)", color: "var(--danger)" }}>
-      <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: "var(--danger)" }} />
-      Неактивен
-    </span>
   );
 }
 
@@ -224,7 +199,7 @@ export function CoilsManager() {
 
   return (
     <div style={{ maxWidth: 1100 }}>
-      <h1 style={{ fontSize: "1.5rem", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>Рулоны</h1>
+      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>Рулоны</h1>
 
       <form
         onSubmit={handleCreate}
@@ -264,22 +239,9 @@ export function CoilsManager() {
           value={form.coatingId}
           onChange={(v) => setForm((prev) => ({ ...prev, coatingId: v }))}
         />
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            padding: "0.5rem 1.25rem",
-            borderRadius: "var(--radius-md)",
-            backgroundColor: "var(--brand-primary)",
-            border: "1px solid var(--border)",
-            color: "var(--on-brand)",
-            fontSize: "0.85rem",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
+        <AdminButton type="submit" variant="primary" disabled={submitting} style={{ padding: "0.5rem 1.25rem", borderRadius: "var(--radius-md)", fontSize: "var(--text-2)" }}>
           Добавить рулон
-        </button>
+        </AdminButton>
       </form>
       {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
 
@@ -319,7 +281,7 @@ export function CoilsManager() {
               padding: "0.65rem 1rem",
               backgroundColor: "var(--bg-header)",
               color: "var(--text-muted)",
-              fontSize: "0.75rem",
+              fontSize: "var(--text-1)",
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.03em",
@@ -331,7 +293,7 @@ export function CoilsManager() {
             ))}
           </div>
           {items.length === 0 && (
-            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "0.9rem" }}>
+            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "var(--text-3)" }}>
               Нет рулонов
             </div>
           )}
@@ -374,14 +336,15 @@ export function CoilsManager() {
                   onChange={(v) => setEditForm((prev) => ({ ...prev, coatingId: v }))}
                 />
                 {editError && <p style={{ color: "var(--danger)" }}>{editError}</p>}
-                <StatusPill active={item.active} />
+                <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button type="button" onClick={() => saveEdit(item.id)} style={buttonStyle}>
+                  {/* variant="primary" — то же смысловое действие ("сохранить правку"),
+                      что и в ReferenceDataManager, где оно уже было синим; здесь раньше
+                      было нейтральным без причины (аудит, «Повторяющиеся паттерны»). */}
+                  <AdminButton type="button" variant="primary" onClick={() => saveEdit(item.id)}>
                     Сохранить
-                  </button>
-                  <button type="button" onClick={() => setEditingId(null)} style={buttonStyle}>
-                    Отмена
-                  </button>
+                  </AdminButton>
+                  <AdminButton type="button" onClick={() => setEditingId(null)}>Отмена</AdminButton>
                 </div>
               </div>
             ) : (
@@ -394,30 +357,28 @@ export function CoilsManager() {
                   padding: "0.7rem 1rem",
                   backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
                   borderBottom: "1px solid var(--border)",
-                  fontSize: "0.9rem",
+                  fontSize: "var(--text-3)",
                 }}
               >
                 <span style={{ color: "var(--text-primary)" }}>{item.color.displayName}</span>
                 <span style={{ color: "var(--text-secondary)" }}>{item.thickness.displayName}</span>
                 <span style={{ color: "var(--text-secondary)" }}>{item.manufacturer.displayName}</span>
                 <span style={{ color: "var(--text-secondary)" }}>{item.coating.displayName}</span>
-                <StatusPill active={item.active} />
+                <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                  <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-                    <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
+                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                    <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
                       Открыть
                     </Link>
-                    <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "0.8rem" }}>
+                    <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
                       Печать
                     </Link>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button type="button" onClick={() => startEdit(item)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
-                      Изменить
-                    </button>
-                    <button type="button" onClick={() => toggleActive(item.id, !item.active)} style={{ ...buttonStyle, padding: "0.25rem 0.6rem", fontSize: "0.8rem" }}>
+                    <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
+                    <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
                       {item.active ? "Деактивировать" : "Восстановить"}
-                    </button>
+                    </AdminButton>
                   </div>
                 </div>
               </div>
@@ -428,14 +389,3 @@ export function CoilsManager() {
     </div>
   );
 }
-
-const buttonStyle: CSSProperties = {
-  padding: "0.35rem 0.8rem",
-  borderRadius: "var(--radius-sm)",
-  backgroundColor: "var(--bg-card-2)",
-  border: "1px solid var(--border)",
-  color: "var(--text-secondary)",
-  cursor: "pointer",
-  fontSize: "0.8rem",
-  whiteSpace: "nowrap",
-};

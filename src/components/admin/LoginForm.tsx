@@ -42,7 +42,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-      <label style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+      <label style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)" }}>
         Логин
         <input
           type="text"
@@ -53,7 +53,7 @@ export function LoginForm() {
           style={{ display: "block", width: "100%", padding: "0.5rem", marginTop: "0.25rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
         />
       </label>
-      <label style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+      <label style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)" }}>
         Пароль
         <input
           type="password"
@@ -68,7 +68,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={submitting}
-        style={{ padding: "0.6rem 1rem", borderRadius: "var(--radius-md)", backgroundColor: "var(--brand-primary)", border: "1px solid var(--border)", color: "var(--on-brand)", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer" }}
+        style={{ padding: "0.6rem 1rem", borderRadius: "var(--radius-md)", backgroundColor: "var(--brand-primary)", border: "1px solid var(--border)", color: "var(--on-brand)", fontSize: "var(--text-3)", fontWeight: 600, cursor: "pointer" }}
       >
         {submitting ? "Вход…" : "Войти"}
       </button>
