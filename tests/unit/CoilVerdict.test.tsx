@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import "fake-indexeddb/auto";
 
-import { cleanup, render, screen } from "@testing-library/react";
-import { del, set } from "idb-keyval";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { del, get, set } from "idb-keyval";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PublicCoil } from "@/lib/public/coil";
@@ -121,6 +121,25 @@ describe("CoilVerdict (jsdom + fake-indexeddb + мок fetch)", () => {
     expect(screen.getByText("Нужно: 0,50 мм")).toBeTruthy();
     expect(screen.getByText("Нужно: Узбекистан")).toBeTruthy();
     expect(screen.getByText("Нужно: Viking")).toBeTruthy();
+  });
+
+  it("после MISMATCH: «СКАНИРОВАТЬ ДРУГОЙ РУЛОН» ведёт на /scan/coil, требование не очищается (раздел 6/18 ТЗ)", async () => {
+    await set(ACTIVE_REQUIREMENT_STORAGE_KEY, requirement);
+    mockFetchOnce({
+      status: 200,
+      body: { ...matchingCoil, ral: { code: "9003", displayName: "RAL 9003" } },
+    });
+
+    render(<CoilVerdict id="coil-1" initialCoil={initialCoil} />);
+
+    await screen.findByText("СТОП — РУЛОН НЕ ПОДХОДИТ");
+    fireEvent.click(screen.getByText("СКАНИРОВАТЬ ДРУГОЙ РУЛОН"));
+
+    expect(push).toHaveBeenCalledWith("/scan/coil");
+    // Раздел 6/18 ТЗ: MISMATCH не должен молчаливо сбрасывать активное
+    // требование — работник должен иметь возможность отсканировать другой
+    // рулон под то же самое требование накладной, не заново сканируя её.
+    expect(await get(ACTIVE_REQUIREMENT_STORAGE_KEY)).toEqual(requirement);
   });
 
   it("рулон не найден (404) -> РУЛОН НЕ НАЙДЕН (пункт 7 чек-листа)", async () => {

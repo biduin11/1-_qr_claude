@@ -13,6 +13,7 @@ type FakeHtml5QrcodeInstance = {
   elementId: string;
   stopped: boolean;
   cleared: boolean;
+  stopCallCount: number;
   onSuccess: SuccessCallback | null;
   start: (
     cameraIdOrConfig: unknown,
@@ -25,10 +26,19 @@ type FakeHtml5QrcodeInstance = {
 };
 
 vi.mock("html5-qrcode", () => {
+  // Реплика реального поведения html5-qrcode (проверено чтением исходников
+  // node_modules/html5-qrcode/cjs/html5-qrcode.js): stop() на уже
+  // остановленном/не запущенном сканере кидает СИНХРОННОЕ исключение
+  // (обычную строку), не Promise-реджект — `if (!isScanning) throw "...".`
+  // Старый мок этого не воспроизводил вообще (stop() всегда успешно
+  // резолвился), поэтому тесты не могли поймать баг двойного stop() в
+  // cleanup эффекта (см. QrScannerView.tsx, комментарий в cleanup).
   class FakeHtml5Qrcode implements FakeHtml5QrcodeInstance {
     elementId: string;
     stopped = false;
     cleared = false;
+    stopCallCount = 0;
+    isScanningState = false;
     onSuccess: SuccessCallback | null = null;
 
     constructor(elementId: string) {
@@ -45,10 +55,17 @@ vi.mock("html5-qrcode", () => {
         return Promise.reject(new Error("Permission denied"));
       }
       this.onSuccess = qrCodeSuccessCallback;
+      this.isScanningState = true;
       return Promise.resolve(null);
     }
 
     stop(): Promise<void> {
+      this.stopCallCount += 1;
+      if (!this.isScanningState) {
+        // Буквально воспроизводит реальную библиотеку — throw строки, не Error.
+        throw "Cannot stop, scanner is not running or paused.";
+      }
+      this.isScanningState = false;
       this.stopped = true;
       return Promise.resolve();
     }
@@ -85,6 +102,37 @@ describe("QrScannerView (мок html5-qrcode)", () => {
     await waitFor(() => expect(onScan).toHaveBeenCalledTimes(1));
     expect(onScan).toHaveBeenCalledWith("https://example.com/coil/abc");
     expect(instance.stopped).toBe(true);
+  });
+
+  it("размонтирование ПОСЛЕ успешного скана (эмулирует router.push -> unmount) не кидает исключение из cleanup — регрессия бага с Error Boundary на переходе /scan/coil -> /coil/:id", async () => {
+    // До фикса: success-callback уже полностью останавливал сканер перед
+    // onScan()/навигацией, а cleanup эффекта при последующем размонтировании
+    // (когда React убирает QrScannerView со страницы после router.push)
+    // безусловно звал scanner.stop() ЕЩЁ РАЗ. Реальный html5-qrcode.stop()
+    // на уже остановленном сканере кидает синхронное исключение — .catch()
+    // на промисе от него не защищает (throw происходит раньше, чем
+    // появляется сам промис), и оно уходило необработанным из cleanup
+    // прямо в Error Boundary. Мок теперь воспроизводит этот throw
+    // (см. класс FakeHtml5Qrcode выше) — этот тест обязан был падать на
+    // старой реализации QrScannerView и обязан проходить на новой.
+    const onScan = vi.fn();
+    const { unmount } = render(
+      <QrScannerView instructions="test" validate={() => true} onScan={onScan} onCancel={vi.fn()} />,
+    );
+    await waitFor(() => expect(instances).toHaveLength(1));
+    const instance = instances[0]!;
+
+    act(() => {
+      instance.onSuccess?.("https://example.com/coil/abc");
+    });
+    await waitFor(() => expect(onScan).toHaveBeenCalledTimes(1));
+    expect(instance.stopCallCount).toBe(1);
+
+    // Размонтирование не должно бросать (React перехватил бы синхронное
+    // исключение из cleanup и это уронило бы unmount()/тест) и не должно
+    // звать stop() второй раз — успешный путь уже сам отвечает за teardown.
+    expect(() => unmount()).not.toThrow();
+    expect(instance.stopCallCount).toBe(1);
   });
 
   it("повторное срабатывание на тот же QR не вызывает onScan снова (пункт 16 чек-листа)", async () => {
