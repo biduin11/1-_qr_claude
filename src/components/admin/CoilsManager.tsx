@@ -277,7 +277,12 @@ export function CoilsManager() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
+              gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
+              // Без gap длинные значения (например "Северсталь") заполняют
+              // всю ширину своей fr-колонки на узких экранах и упираются
+              // прямо в следующую — тот же дефект, что и в
+              // ReferenceDataManager (см. комментарий там).
+              gap: "1rem",
               padding: "0.65rem 1rem",
               backgroundColor: "var(--bg-header)",
               color: "var(--text-muted)",
@@ -288,7 +293,7 @@ export function CoilsManager() {
               borderBottom: "1px solid var(--border)",
             }}
           >
-            {["RAL", "Толщина", "Производитель", "Покрытие", "Статус", ""].map((label) => (
+            {["RAL", "Толщина", "Производитель", "Покрытие", "Статус", "Действия"].map((label) => (
               <span key={label}>{label}</span>
             ))}
           </div>
@@ -303,9 +308,9 @@ export function CoilsManager() {
                 key={item.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
+                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
                   alignItems: "center",
-                  gap: "0.5rem",
+                  gap: "1rem",
                   padding: "0.5rem 1rem",
                   borderBottom: "1px solid var(--border)",
                   backgroundColor: "var(--bg-card-2)",
@@ -337,7 +342,7 @@ export function CoilsManager() {
                 />
                 {editError && <p style={{ color: "var(--danger)" }}>{editError}</p>}
                 <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div style={{ display: "flex", gap: "var(--gap-actions)" }}>
                   {/* variant="primary" — то же смысловое действие ("сохранить правку"),
                       что и в ReferenceDataManager, где оно уже было синим; здесь раньше
                       было нейтральным без причины (аудит, «Повторяющиеся паттерны»). */}
@@ -352,7 +357,8 @@ export function CoilsManager() {
                 key={item.id}
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 140px 240px",
+                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
+                  gap: "1rem",
                   alignItems: "center",
                   padding: "0.7rem 1rem",
                   backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
@@ -365,21 +371,23 @@ export function CoilsManager() {
                 <span style={{ color: "var(--text-secondary)" }}>{item.manufacturer.displayName}</span>
                 <span style={{ color: "var(--text-secondary)" }}>{item.coating.displayName}</span>
                 <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                    <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
-                      Открыть
-                    </Link>
-                    <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
-                      Печать
-                    </Link>
-                  </div>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
-                    <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
-                      {item.active ? "Деактивировать" : "Восстановить"}
-                    </AdminButton>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--gap-actions)" }}>
+                  <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
+                    Открыть
+                  </Link>
+                  <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
+                    Печать
+                  </Link>
+                  {/* Разделяет навигацию (открыть/печать) от действий, меняющих
+                      данные (изменить/деактивировать) — раньше это деление
+                      читалось только через случайный перенос на вторую строку
+                      (аудит, «три разных gap подряд»); теперь явный разделитель
+                      в одном ряду с единым --gap-actions между всеми элементами. */}
+                  <span aria-hidden style={{ width: 1, height: 16, flexShrink: 0, backgroundColor: "var(--border-strong)" }} />
+                  <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
+                  <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
+                    {item.active ? "Деактивировать" : "Восстановить"}
+                  </AdminButton>
                 </div>
               </div>
             ),

@@ -53,8 +53,11 @@ function itemToFormState(fields: FieldConfig[], item: ReferenceItem): Record<str
 }
 
 /** `code`/числовые поля — единственные "чисто технические" колонки в этих
- * таблицах (аудит: displayName/aliases — составные строки, их выравнивание
- * по правому краю только мешало бы читать). */
+ * таблицах, их значения набираются моноширинным шрифтом (как в CoilsManager
+ * нет отдельной колонки code, но там нет и повода — здесь код/номер и
+ * составное название стоят рядом, и моно отличает одно от другого).
+ * Выравнивание у всех колонок левое — как в CoilsManager, для единообразия
+ * между двумя admin-таблицами. */
 function isTechnicalField(field: FieldConfig): boolean {
   return field.type === "number" || field.name === "code";
 }
@@ -267,6 +270,11 @@ export function ReferenceDataManager({
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${fields.length}, 1fr) 140px 140px`,
+              // Без gap длинное значение может почти заполнить свою
+              // fr-колонку и упереться прямо в левый край следующей —
+              // "7024RAL 7024" в одну строку без пробела (тот же класс
+              // бага, что и в CoilsManager, см. комментарий там).
+              gap: "1.5rem",
               padding: "0.65rem 1rem",
               backgroundColor: "var(--bg-header)",
               color: "var(--text-muted)",
@@ -277,9 +285,7 @@ export function ReferenceDataManager({
             }}
           >
             {fields.map((field) => (
-              <span key={field.name} style={{ textAlign: isTechnicalField(field) ? "right" : undefined }}>
-                {field.label}
-              </span>
+              <span key={field.name}>{field.label}</span>
             ))}
             <span>Статус</span>
             <span />
@@ -297,6 +303,7 @@ export function ReferenceDataManager({
                   style={{
                     display: "grid",
                     gridTemplateColumns: `repeat(${fields.length}, 1fr) 140px 140px`,
+                    gap: "1.5rem",
                     alignItems: "center",
                     padding: "0.6rem 1rem",
                     backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
@@ -307,7 +314,7 @@ export function ReferenceDataManager({
                   {fields.map((field) => {
                     const isTechnical = isTechnicalField(field);
                     return (
-                      <span key={field.name} style={{ color: "var(--text-secondary)", textAlign: isTechnical ? "right" : undefined }}>
+                      <span key={field.name} style={{ color: "var(--text-secondary)" }}>
                         {isEditing ? (
                           <input
                             type={field.type === "number" ? "number" : "text"}
@@ -322,7 +329,6 @@ export function ReferenceDataManager({
                               color: "var(--text-primary)",
                               fontSize: "var(--text-2)",
                               fontFamily: isTechnical ? "var(--font-mono)" : undefined,
-                              textAlign: isTechnical ? "right" : undefined,
                             }}
                           />
                         ) : (
