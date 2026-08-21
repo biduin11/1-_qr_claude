@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Button } from "@/components/worker/Button";
 
 /**
  * Главный экран работника (раздел 19 ТЗ). В основном сценарии сюда не
@@ -21,23 +21,7 @@ export default function HomePage() {
       }}
     >
       <h1 style={{ fontSize: "var(--text-9)", margin: 0 }}>КОНТРОЛЬ МЕТАЛЛА</h1>
-      <Link
-        href="/scan/invoice"
-        style={{
-          fontSize: "var(--text-7)",
-          fontWeight: 700,
-          padding: "1.5rem 2rem",
-          width: "100%",
-          maxWidth: 480,
-          textDecoration: "none",
-          border: "none",
-          borderRadius: "var(--radius-lg)",
-          backgroundColor: "var(--brand-orange)",
-          color: "var(--on-accent)",
-        }}
-      >
-        СКАНИРОВАТЬ НАКЛАДНУЮ
-      </Link>
+      <Button href="/scan/invoice">СКАНИРОВАТЬ НАКЛАДНУЮ</Button>
     </main>
   );
 }

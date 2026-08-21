@@ -1,3 +1,4 @@
+import { Card } from "@/components/worker/Card";
 import type { ActiveMaterialRequirement } from "@/lib/worker/active-requirement";
 
 /**
@@ -13,25 +14,25 @@ export function RequirementCard({
   >;
 }) {
   return (
-    <dl
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr",
-        gap: "0.75rem",
-        // --text-7, не --text-6 (как в аналогичной по структуре
-        // CoilReadOnlyCard) — здесь то, что работник должен найти, а не
-        // пассивный просмотр уже найденного; сохраняет более крупный акцент.
-        fontSize: "var(--text-7)",
-        width: "100%",
-        maxWidth: 480,
-        margin: "0 auto",
-      }}
-    >
-      <Row label="Цвет" value={requirement.ralDisplayName} />
-      <Row label="Толщина" value={requirement.thicknessDisplayName} />
-      <Row label="Производитель" value={requirement.manufacturerDisplayName} />
-      <Row label="Покрытие" value={requirement.coatingDisplayName} />
-    </dl>
+    <Card style={{ margin: "0 auto" }}>
+      <dl
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "0.75rem",
+          // --text-7, не --text-6 (как в аналогичной по структуре
+          // CoilReadOnlyCard) — здесь то, что работник должен найти, а не
+          // пассивный просмотр уже найденного; сохраняет более крупный акцент.
+          fontSize: "var(--text-7)",
+          margin: 0,
+        }}
+      >
+        <Row label="Цвет" value={requirement.ralDisplayName} />
+        <Row label="Толщина" value={requirement.thicknessDisplayName} />
+        <Row label="Производитель" value={requirement.manufacturerDisplayName} />
+        <Row label="Покрытие" value={requirement.coatingDisplayName} />
+      </dl>
+    </Card>
   );
 }
 

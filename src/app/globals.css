@@ -23,12 +23,35 @@ body {
 ───────────────────────────────────────────────────────────── */
 
 /* Токены, не зависящие от темы — форма радиусов, шрифтовые стеки, шкала
-   размеров текста. */
+   размеров текста.
+
+   Радиус/spacing/shadow — адаптация системы DealDeck (dealdeck-design-
+   tokens.md, 2026-08-21): radius sm/md/lg/xl/2xl = 8/12/16/20/24px,
+   spacing-шкала 4·8·12·16·20·24·32·40·48, мягкие тени вместо бордеров
+   как основной способ отделить карточку от фона. --text-1…9 НЕ трогаем —
+   это существующая шкала под крупные full-screen вердикты рабочих
+   экранов (раздел ТЗ "результат читается за секунду"), к палитре/форме
+   отношения не имеет. */
 :root {
-  --radius: 0.5rem;
-  --radius-lg: var(--radius); /* 8px */
-  --radius-md: calc(0.5rem - 2px); /* 6px */
-  --radius-sm: calc(0.5rem - 4px); /* 4px */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.75rem; /* 12px */
+  --radius-lg: 1rem; /* 16px */
+  --radius-xl: 1.25rem; /* 20px — карточки */
+  --radius-2xl: 1.5rem; /* 24px — крупные карточки/контейнеры */
+  --radius-full: 9999px; /* пилюли/бейджи */
+
+  /* Spacing scale (DealDeck, база 4px) — используется в новых общих
+     компонентах (Button/Card) и точечно там, где раньше было "плавающее"
+     rem-значение без системы. */
+  --space-4: 0.25rem;
+  --space-8: 0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-20: 1.25rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-40: 2.5rem;
+  --space-48: 3rem;
 
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", monospace;
@@ -69,31 +92,38 @@ body {
 .dark {
   color-scheme: dark;
 
-  --bg-root: #161616;
-  --bg-card: #222222;
-  --bg-card-2: #2d2d2d;
-  --bg-sidebar: #0d0d0d;
-  --bg-header: #1c1c1c;
+  /* DealDeck-палитра (dealdeck-design-tokens.md), адаптированная под тёмную
+     тему — источник светлый, поэтому primary/success-strong/danger-strong/
+     link здесь осветлены относительно .light для контраста на почти-чёрном
+     фоне; сама методика (не абсолютные hex) перенесена из logist_app. */
+  --bg-root: #16161d;
+  --bg-card: #212129;
+  --bg-card-2: #2a2a35;
+  --bg-sidebar: #1a1a22;
+  --bg-header: #1c1c24;
 
-  --brand-primary: #121193;
-  --brand-primary-soft: rgba(18, 17, 147, 0.18);
-  --brand-orange: #ff8518;
-  --brand-orange-soft: rgba(255, 133, 24, 0.14);
-  --brand-purple: #c45ec7;
+  --brand-primary: #6773fa;
+  --brand-primary-soft: rgba(103, 115, 250, 0.18);
+  /* brand-orange больше не заливка CTA (все CTA — brand-primary, см. Button/
+     компоненты рабочих экранов) — теперь это акцент только для LogoutButton
+     и --warning. */
+  --brand-orange: #ffb020;
+  --brand-orange-soft: rgba(255, 176, 32, 0.16);
+  --brand-purple: #a996ff;
 
   --text-primary: #ffffff;
   --text-secondary: #aaaaaa;
-  --text-muted: #555555;
+  --text-muted: #6e6e7a;
   --border: rgba(255, 255, 255, 0.07);
   --border-strong: rgba(255, 255, 255, 0.12);
 
-  --success: #1d9e75;
-  --success-soft: rgba(29, 158, 117, 0.15);
-  --success-surface: rgba(29, 158, 117, 0.1);
-  --danger: #e05252;
-  --danger-soft: rgba(224, 82, 82, 0.15);
-  --danger-surface: rgba(224, 82, 82, 0.1);
-  --warning: #ff8518;
+  --success: #4cc366;
+  --success-soft: rgba(76, 195, 102, 0.15);
+  --success-surface: rgba(76, 195, 102, 0.1);
+  --danger: #f2555f;
+  --danger-soft: rgba(242, 85, 95, 0.15);
+  --danger-surface: rgba(242, 85, 95, 0.1);
+  --warning: #ffb020;
 
   /* Усиленный вариант ТОЛЬКО для экранов МОЖНО/СТОП (иконка/заголовок/
      итог) — раздел 41 ТЗ требует, чтобы результат читался мгновенно, и это
@@ -102,15 +132,17 @@ body {
      подложке — ОК для мелких бейджей, но заметно слабее прежних хардкод-
      значений (~7:1). --success-strong/--danger-strong держат исходный
      уровень контраста, не понижая "громкость" вердикта при переходе на
-     тему. См. использование в MatchScreen/MismatchScreen/CheckErrorScreen/
-     FullScreenMessage. */
-  --success-strong: #33dd9c;
-  --danger-strong: #ff8a8a;
+     тему — тот же принцип применён и после перехода на палитру DealDeck:
+     это НЕ плоские --success/--danger, а отдельно подобранные яркие тона
+     той же цветовой семьи. См. использование в MatchScreen/MismatchScreen/
+     CheckErrorScreen/FullScreenMessage. */
+  --success-strong: #5fe08a;
+  --danger-strong: #ff6b74;
 
   /* Ссылки/акцентные подписи поверх тёмных поверхностей — осветлённый
-     brand-primary, т.к. сам #121193 недостаточно контрастен как текст
+     brand-primary, т.к. сам #4b57f5 недостаточно контрастен как текст
      на тёмном фоне. В светлой теме в этом нет нужды (см. .light). */
-  --link: #8584e8;
+  --link: #939cff;
 
   --background: var(--bg-root);
   --foreground: var(--text-primary);
@@ -119,50 +151,63 @@ body {
   --input: var(--bg-card-2);
   --ring: var(--brand-primary);
 
-  --radius: 0.5rem;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-primary: 0 8px 20px rgba(103, 115, 250, 0.35);
 }
 
 .light {
   color-scheme: light;
 
-  --bg-root: #f6f7fb;
+  /* DealDeck-палитра (dealdeck-design-tokens.md) — лавандовый фон,
+     белые поверхности, индиго primary #4B57F5. Разделение зон теперь идёт
+     контрастом фона + мягкой тенью (--shadow-card), а не бордером — бордер
+     остаётся только там, где нужен явный тонкий контур поверх однотонного
+     фона (тот же принцип, что в исходном документе токенов). */
+  --bg-root: #f1f1fa;
   --bg-card: #ffffff;
-  --bg-card-2: #f0f2f7;
-  --bg-sidebar: #111127;
+  --bg-card-2: #ececf5;
+  /* Раньше сайдбар оставался тёмным даже в светлой теме — сознательно
+     перекрашен в белый вслед за DealDeck (белая плавающая панель на
+     лавандовом фоне); AdminNavLink пересчитан под это (см. компонент). */
+  --bg-sidebar: #ffffff;
   --bg-header: #ffffff;
 
-  --brand-primary: #121193;
-  --brand-primary-soft: rgba(18, 17, 147, 0.1);
-  --brand-orange: #e66f00;
-  --brand-orange-soft: rgba(230, 111, 0, 0.1);
-  --brand-purple: #a944a6;
+  --brand-primary: #4b57f5;
+  --brand-primary-soft: rgba(75, 87, 245, 0.1);
+  /* brand-orange больше не заливка CTA (все CTA — brand-primary, как в
+     DealDeck) — остаётся только акцентом для LogoutButton и --warning,
+     поэтому нужен тёмный настолько, чтобы читаться как текст на светлом
+     фоне (не плоский DealDeck-амбер — тот для текста слишком светлый). */
+  --brand-orange: #a65f00;
+  --brand-orange-soft: rgba(166, 95, 0, 0.1);
+  --brand-purple: #8b7cf6;
 
-  --text-primary: #151525;
-  --text-secondary: #606274;
-  --text-muted: #8b8d9b;
-  --border: rgba(21, 21, 37, 0.1);
-  --border-strong: rgba(21, 21, 37, 0.16);
+  --text-primary: #111114;
+  --text-secondary: #4b4b4f;
+  --text-muted: #7a7a80;
+  --border: #ececf5;
+  --border-strong: rgba(17, 17, 20, 0.14);
 
-  --success: #13795b;
-  --success-soft: rgba(19, 121, 91, 0.12);
-  --success-surface: rgba(19, 121, 91, 0.07);
-  --danger: #c83d45;
-  --danger-soft: rgba(200, 61, 69, 0.12);
-  --danger-surface: rgba(200, 61, 69, 0.07);
-  --warning: #c45e00;
+  --success: #4cc366;
+  --success-soft: rgba(76, 195, 102, 0.12);
+  --success-surface: rgba(76, 195, 102, 0.07);
+  --danger: #f2555f;
+  --danger-soft: rgba(242, 85, 95, 0.12);
+  --danger-surface: rgba(242, 85, 95, 0.07);
+  --warning: #9a6a00;
 
   /* Калибровано под фактическую --success-surface/--danger-surface этой
      темы, чтобы держать (не хуже) контраст исходных хардкод-значений первой
      версии рабочих экранов (~5.3:1 / ~7.1:1 на белом) — та же логика, что и
      в тёмной теме выше: МОЖНО/СТОП не должны становиться тише при переходе
-     на токены темы. */
-  --success-strong: #0f5f47;
-  --danger-strong: #911919;
+     на токены темы. Это НЕ плоские DealDeck --success/--danger (те дают
+     заметно меньший контраст на белом) — тёмные тона той же цветовой семьи. */
+  --success-strong: #1b7a44;
+  --danger-strong: #b3222c;
 
-  /* Sidebar в светлой теме остаётся тёмным (--bg-sidebar), поэтому текст
-     ссылок на нём калибруется как в тёмной теме — см. AdminNavLink. Вне
-     сайдбара (светлые поверхности) сам brand-primary уже достаточно
-     контрастен как текст. */
+  /* Сайдбар теперь белый — ссылки читаются как обычный текст на светлой
+     поверхности, brand-primary как есть уже достаточно контрастен. */
   --link: var(--brand-primary);
 
   --background: var(--bg-root);
@@ -172,7 +217,9 @@ body {
   --input: var(--bg-card-2);
   --ring: var(--brand-primary);
 
-  --radius: 0.5rem;
+  --shadow-sm: 0 1px 2px rgba(17, 17, 20, 0.04);
+  --shadow-card: 0 8px 24px rgba(17, 17, 20, 0.06);
+  --shadow-primary: 0 8px 20px rgba(75, 87, 245, 0.25);
 }
 
 html,

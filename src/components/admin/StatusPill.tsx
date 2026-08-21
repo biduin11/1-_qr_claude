@@ -16,7 +16,7 @@ export function StatusPill({ tone, label }: { tone: "success" | "danger"; label:
         display: "inline-flex",
         alignItems: "center",
         gap: "0.375rem",
-        borderRadius: "999px",
+        borderRadius: "var(--radius-full)",
         padding: "0.25rem 0.6rem",
         fontSize: "var(--text-1)",
         fontWeight: 600,
@@ -25,7 +25,7 @@ export function StatusPill({ tone, label }: { tone: "success" | "danger"; label:
         color,
       }}
     >
-      <span style={{ width: 6, height: 6, borderRadius: "999px", backgroundColor: color }} />
+      <span style={{ width: 6, height: 6, borderRadius: "var(--radius-full)", backgroundColor: color }} />
       {label}
     </span>
   );

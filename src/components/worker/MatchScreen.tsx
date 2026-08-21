@@ -1,3 +1,4 @@
+import { Button } from "@/components/worker/Button";
 import type { FieldComparison } from "@/lib/worker/compare";
 
 /**
@@ -63,24 +64,9 @@ export function MatchScreen({
 
       <p style={{ fontSize: "var(--text-7)", fontWeight: 700, color: okColor, margin: 0 }}>МОЖНО ИСПОЛЬЗОВАТЬ</p>
 
-      <button
-        type="button"
-        onClick={onFinish}
-        disabled={finishing}
-        style={{
-          fontSize: "var(--text-7)",
-          fontWeight: 700,
-          padding: "1.5rem 2rem",
-          width: "100%",
-          maxWidth: 480,
-          border: "none",
-          borderRadius: "var(--radius-lg)",
-          backgroundColor: "var(--brand-orange)",
-          color: "var(--on-accent)",
-        }}
-      >
+      <Button onClick={onFinish} disabled={finishing}>
         {finishing ? "Завершение…" : "ЗАВЕРШИТЬ"}
-      </button>
+      </Button>
     </main>
   );
 }

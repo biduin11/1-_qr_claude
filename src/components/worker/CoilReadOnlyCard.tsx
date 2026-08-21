@@ -1,3 +1,4 @@
+import { Card } from "@/components/worker/Card";
 import type { PublicCoil } from "@/lib/public/coil";
 
 /** Read-only карточка рулона — нет активного требования, значит нет вердикта (раздел 8 ТЗ). */
@@ -13,9 +14,9 @@ export function CoilReadOnlyCard({ coil }: { coil: Pick<PublicCoil, "ral" | "thi
         padding: "2rem",
       }}
     >
-      <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
-        <h1 style={{ fontSize: "var(--text-7)", marginBottom: "1.5rem" }}>Рулон</h1>
-        <dl style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: "1rem", fontSize: "var(--text-6)" }}>
+      <Card style={{ maxWidth: 400, textAlign: "center" }}>
+        <h1 style={{ fontSize: "var(--text-7)", marginTop: 0, marginBottom: "1.5rem" }}>Рулон</h1>
+        <dl style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: "1rem", fontSize: "var(--text-6)", margin: 0 }}>
           <dt style={{ textAlign: "left", color: "var(--text-secondary)" }}>Цвет</dt>
           <dd style={{ textAlign: "right", margin: 0, fontWeight: 600, fontFamily: "var(--font-mono)" }}>RAL {coil.ral.code}</dd>
 
@@ -28,7 +29,7 @@ export function CoilReadOnlyCard({ coil }: { coil: Pick<PublicCoil, "ral" | "thi
           <dt style={{ textAlign: "left", color: "var(--text-secondary)" }}>Покрытие</dt>
           <dd style={{ textAlign: "right", margin: 0, fontWeight: 600 }}>{coil.coating.displayName}</dd>
         </dl>
-      </div>
+      </Card>
     </main>
   );
 }

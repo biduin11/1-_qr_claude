@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 
 /**
  * Ссылка навигации admin-раздела с подсветкой активного пункта.
- * Перенос стиля из fin-krovlya `Sidebar.tsx`: активный пункт — мягкий
- * фон brand-primary и светлый акцент; ховер — полупрозрачный белый.
+ * Активный пункт — заливка brand-primary, белый текст (DealDeck: активный
+ * пункт навигации = сплошная primary-заливка, а не мягкий тон); ховер —
+ * --bg-card-2. Раньше оба состояния были захардкожены как rgba(18,17,147,…)/
+ * rgba(255,255,255,…) в расчёте на всегда-тёмный сайдбар — сломалось бы на
+ * белом сайдбаре светлой темы, поэтому переведено на токены.
  */
 export function AdminNavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
@@ -16,8 +19,8 @@ export function AdminNavLink({ href, label }: { href: string; label: string }) {
     <Link
       href={href}
       style={{
-        color: active ? "var(--link)" : "var(--text-secondary)",
-        backgroundColor: active ? "rgba(18,17,147,0.25)" : "transparent",
+        color: active ? "var(--on-brand)" : "var(--text-secondary)",
+        backgroundColor: active ? "var(--brand-primary)" : "transparent",
         textDecoration: "none",
         fontSize: "var(--text-3)",
         fontWeight: active ? 600 : 400,
@@ -27,7 +30,7 @@ export function AdminNavLink({ href, label }: { href: string; label: string }) {
       }}
       onMouseEnter={(e) => {
         if (!active)
-          ((e.currentTarget as HTMLElement).style.backgroundColor = "rgba(255,255,255,0.05)");
+          ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--bg-card-2)");
       }}
       onMouseLeave={(e) => {
         if (!active)

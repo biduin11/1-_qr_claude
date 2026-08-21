@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/worker/Button";
 import { ConflictScreen } from "@/components/worker/ConflictScreen";
 import { FullScreenMessage } from "@/components/worker/FullScreenMessage";
 import { RequirementCard } from "@/components/worker/RequirementCard";
@@ -67,24 +67,7 @@ export function CheckRequirementScreen({ incoming }: { incoming: IncomingRequire
     >
       <h1 style={{ fontSize: "var(--text-8)", margin: 0 }}>ТРЕБУЕТСЯ РУЛОН</h1>
       <RequirementCard requirement={displayed} />
-      <Link
-        href="/scan/coil"
-        style={{
-          fontSize: "var(--text-7)",
-          fontWeight: 700,
-          padding: "1.5rem 2rem",
-          width: "100%",
-          maxWidth: 480,
-          textAlign: "center",
-          textDecoration: "none",
-          border: "none",
-          borderRadius: "var(--radius-lg)",
-          backgroundColor: "var(--brand-orange)",
-          color: "var(--on-accent)",
-        }}
-      >
-        СКАНИРОВАТЬ РУЛОН
-      </Link>
+      <Button href="/scan/coil">СКАНИРОВАТЬ РУЛОН</Button>
     </main>
   );
 }

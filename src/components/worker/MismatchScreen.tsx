@@ -1,3 +1,4 @@
+import { Button } from "@/components/worker/Button";
 import type { FieldComparison } from "@/lib/worker/compare";
 
 /**
@@ -45,7 +46,14 @@ export function MismatchScreen({
         {mismatches.map((comparison) => (
           <div
             key={comparison.field}
-            style={{ textAlign: "left", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", padding: "0.75rem 1rem" }}
+            style={{
+              textAlign: "left",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-lg)",
+              padding: "0.75rem 1rem",
+              boxShadow: "var(--shadow-sm)",
+            }}
           >
             <strong style={{ fontSize: "var(--text-5)" }}>{comparison.label}</strong>
             {/* "Нужно" — обычный текст, "На рулоне" — stopColor: осознанная
@@ -59,23 +67,7 @@ export function MismatchScreen({
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={onScanAnother}
-        style={{
-          fontSize: "var(--text-7)",
-          fontWeight: 700,
-          padding: "1.5rem 2rem",
-          width: "100%",
-          maxWidth: 480,
-          border: "none",
-          borderRadius: "var(--radius-lg)",
-          backgroundColor: "var(--brand-orange)",
-          color: "var(--on-accent)",
-        }}
-      >
-        СКАНИРОВАТЬ ДРУГОЙ РУЛОН
-      </button>
+      <Button onClick={onScanAnother}>СКАНИРОВАТЬ ДРУГОЙ РУЛОН</Button>
     </main>
   );
 }
