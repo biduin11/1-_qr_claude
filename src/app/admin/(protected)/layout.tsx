@@ -70,7 +70,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
         </div>
 
         {NAV_ITEMS.map((item) => (
-          <AdminNavLink key={item.href} href={item.href} label={item.label} icon={item.icon} />
+          <AdminNavLink key={item.href} href={item.href} label={item.label} icon={<item.icon aria-hidden />} />
         ))}
 
         <div style={{ marginTop: "auto", paddingTop: "1rem" }}>
