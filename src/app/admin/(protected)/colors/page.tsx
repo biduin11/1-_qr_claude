@@ -5,6 +5,7 @@ export default function AdminColorsPage() {
     <ReferenceDataManager
       resourcePath="colors"
       title="Цвета RAL"
+      description="Управление справочником цветов RAL"
       fields={[
         { type: "text", name: "code", label: "Код RAL" },
         { type: "text", name: "displayName", label: "Название" },

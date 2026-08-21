@@ -5,6 +5,7 @@ export default function AdminCoatingsPage() {
     <ReferenceDataManager
       resourcePath="coatings"
       title="Покрытия"
+      description="Управление справочником покрытий"
       fields={[
         { type: "text", name: "code", label: "Код" },
         { type: "text", name: "displayName", label: "Название" },

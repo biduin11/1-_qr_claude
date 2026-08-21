@@ -1,6 +1,6 @@
 "use client";
 
-import type { ButtonHTMLAttributes, CSSProperties } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 /**
  * Общая кнопка админки — раньше `buttonStyle` был скопирован по отдельности
@@ -9,34 +9,36 @@ import type { ButtonHTMLAttributes, CSSProperties } from "react";
  * Один компонент вместо трёх копий; `style` можно переопределить точечно
  * (например компактный padding для кнопок в строке таблицы) — как раньше
  * при `{...buttonStyle, ...}`, просто через проп, а не спред константы.
+ *
+ * hover/active/disabled теперь настоящие CSS-состояния классов admin-btn-*
+ * (globals.css), а не onMouseEnter/onMouseLeave на инлайн-стилях.
  */
-type AdminButtonVariant = "secondary" | "primary";
+type AdminButtonVariant = "primary" | "secondary" | "outline-accent" | "outline-danger" | "outline-success";
+type AdminButtonSize = "md" | "sm";
 
 type AdminButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: AdminButtonVariant;
+  size?: AdminButtonSize;
+  icon?: ReactNode;
 };
 
-const baseStyle: CSSProperties = {
-  padding: "0.35rem 0.8rem",
-  borderRadius: "var(--radius-sm)",
-  border: "1px solid var(--border)",
-  cursor: "pointer",
-  fontSize: "var(--text-2)",
-  whiteSpace: "nowrap",
+const VARIANT_CLASS: Record<AdminButtonVariant, string> = {
+  primary: "admin-btn-primary",
+  secondary: "admin-btn-secondary",
+  "outline-accent": "admin-btn-outline-accent",
+  "outline-danger": "admin-btn-outline-danger",
+  "outline-success": "admin-btn-outline-success",
 };
 
-const variantStyle: Record<AdminButtonVariant, CSSProperties> = {
-  secondary: {
-    backgroundColor: "var(--bg-card-2)",
-    color: "var(--text-secondary)",
-  },
-  primary: {
-    backgroundColor: "var(--brand-primary)",
-    color: "var(--on-brand)",
-    fontWeight: 600,
-  },
-};
+export function AdminButton({ variant = "secondary", size = "md", icon, className, children, ...props }: AdminButtonProps) {
+  const classes = ["admin-btn", VARIANT_CLASS[variant], size === "sm" ? "admin-btn-sm" : null, className]
+    .filter(Boolean)
+    .join(" ");
 
-export function AdminButton({ variant = "secondary", style, ...props }: AdminButtonProps) {
-  return <button style={{ ...baseStyle, ...variantStyle[variant], ...style }} {...props} />;
+  return (
+    <button className={classes} {...props}>
+      {icon}
+      {children}
+    </button>
+  );
 }

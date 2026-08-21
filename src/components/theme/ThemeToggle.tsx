@@ -19,20 +19,21 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={isLight ? "Включить тёмную тему" : "Включить светлую тему"}
       title={isLight ? "Тёмная тема" : "Светлая тема"}
-      className="no-print"
+      className="no-print theme-toggle-btn"
       style={{
         position: "fixed",
-        top: "0.65rem",
-        right: "0.65rem",
+        top: "0.75rem",
+        right: "0.75rem",
         zIndex: 50,
-        width: 36,
-        height: 36,
+        width: 40,
+        height: 40,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         borderRadius: "var(--radius-md)",
         backgroundColor: "var(--bg-card)",
         border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-sm)",
         color: "var(--text-secondary)",
         cursor: "pointer",
         padding: 0,

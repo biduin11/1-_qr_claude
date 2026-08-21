@@ -5,6 +5,7 @@ export default function AdminThicknessesPage() {
     <ReferenceDataManager
       resourcePath="thicknesses"
       title="Толщины"
+      description="Управление справочником толщин металла"
       fields={[
         {
           type: "number",

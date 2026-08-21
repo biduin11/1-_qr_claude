@@ -5,6 +5,7 @@ export default function AdminManufacturersPage() {
     <ReferenceDataManager
       resourcePath="manufacturers"
       title="Производители"
+      description="Управление справочником производителей"
       fields={[
         { type: "text", name: "code", label: "Код" },
         { type: "text", name: "displayName", label: "Название" },

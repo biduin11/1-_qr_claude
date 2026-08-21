@@ -3,8 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { Check, Pencil, Plus, PowerOff, RotateCcw, Search, X } from "lucide-react";
 
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminCard } from "@/components/admin/AdminCard";
+import { AdminSelect } from "@/components/admin/AdminSelect";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusPill } from "@/components/admin/StatusPill";
 
 type RefOption = { id: string; displayName: string };
@@ -36,6 +40,8 @@ type CoilFormState = {
 
 const EMPTY_FORM: CoilFormState = { colorId: "", thicknessId: "", manufacturerId: "", coatingId: "" };
 
+const GRID_COLUMNS = "1.2fr 1fr 1.4fr 1fr 140px minmax(300px, max-content)";
+
 async function fetchRefOptions(resource: string): Promise<RefOption[]> {
   const response = await fetch(`/api/admin/${resource}?active=true`);
   if (!response.ok) return [];
@@ -55,14 +61,9 @@ function RefSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label style={{ display: "flex", flexDirection: "column", fontSize: "var(--text-2)", color: "var(--text-secondary)" }}>
-      {label}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required
-        style={{ padding: "0.4rem", marginTop: "0.25rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
-      >
+    <label className="admin-field" style={{ flex: "1 1 200px", minWidth: 180 }}>
+      <span className="admin-field-label">{label}</span>
+      <AdminSelect value={value} onChange={(e) => onChange(e.target.value)} required>
         <option value="" disabled>
           — выбрать —
         </option>
@@ -71,7 +72,7 @@ function RefSelect({
             {option.displayName}
           </option>
         ))}
-      </select>
+      </AdminSelect>
     </label>
   );
 }
@@ -198,200 +199,210 @@ export function CoilsManager() {
   }
 
   return (
-    <div style={{ maxWidth: 1100 }}>
-      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>Рулоны</h1>
+    <div style={{ maxWidth: 1280 }}>
+      <PageHeader title="Рулоны" description="Журнал рулонов металла и их статус проверки" />
 
-      <form
-        onSubmit={handleCreate}
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          marginBottom: "1.25rem",
-          padding: "1rem",
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
-        }}
-      >
-        <RefSelect
-          label="Цвет RAL"
-          options={refs.colors}
-          value={form.colorId}
-          onChange={(v) => setForm((prev) => ({ ...prev, colorId: v }))}
-        />
-        <RefSelect
-          label="Толщина"
-          options={refs.thicknesses}
-          value={form.thicknessId}
-          onChange={(v) => setForm((prev) => ({ ...prev, thicknessId: v }))}
-        />
-        <RefSelect
-          label="Производитель"
-          options={refs.manufacturers}
-          value={form.manufacturerId}
-          onChange={(v) => setForm((prev) => ({ ...prev, manufacturerId: v }))}
-        />
-        <RefSelect
-          label="Покрытие"
-          options={refs.coatings}
-          value={form.coatingId}
-          onChange={(v) => setForm((prev) => ({ ...prev, coatingId: v }))}
-        />
-        <AdminButton type="submit" variant="primary" disabled={submitting} style={{ padding: "0.5rem 1.25rem", borderRadius: "var(--radius-md)", fontSize: "var(--text-2)" }}>
-          Добавить рулон
-        </AdminButton>
-      </form>
-      {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
+      <AdminCard style={{ marginBottom: "1.5rem" }}>
+        <form onSubmit={handleCreate} style={{ display: "flex", gap: "1rem", alignItems: "flex-end", flexWrap: "wrap" }}>
+          <RefSelect
+            label="Цвет RAL"
+            options={refs.colors}
+            value={form.colorId}
+            onChange={(v) => setForm((prev) => ({ ...prev, colorId: v }))}
+          />
+          <RefSelect
+            label="Толщина"
+            options={refs.thicknesses}
+            value={form.thicknessId}
+            onChange={(v) => setForm((prev) => ({ ...prev, thicknessId: v }))}
+          />
+          <RefSelect
+            label="Производитель"
+            options={refs.manufacturers}
+            value={form.manufacturerId}
+            onChange={(v) => setForm((prev) => ({ ...prev, manufacturerId: v }))}
+          />
+          <RefSelect
+            label="Покрытие"
+            options={refs.coatings}
+            value={form.coatingId}
+            onChange={(v) => setForm((prev) => ({ ...prev, coatingId: v }))}
+          />
+          <AdminButton type="submit" variant="primary" icon={<Plus size={15} />} disabled={submitting}>
+            Добавить рулон
+          </AdminButton>
+        </form>
+        {formError && (
+          <p style={{ color: "var(--danger)", fontSize: "var(--text-2)", margin: "0.75rem 0 0" }}>{formError}</p>
+        )}
+      </AdminCard>
 
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem", alignItems: "center", color: "var(--text-secondary)" }}>
-        <label>
-          Показать:{" "}
-          <select
-            value={activeFilter}
-            onChange={(e) => setActiveFilter(e.target.value as typeof activeFilter)}
-            style={{ backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)", padding: "0.35rem 0.5rem" }}
-          >
-            <option value="active">Активные</option>
-            <option value="inactive">Неактивные</option>
-            <option value="all">Все</option>
-          </select>
-        </label>
-        <label>
-          Поиск:{" "}
+      <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)", fontWeight: 500 }}>Показать:</span>
+          <div style={{ width: 200 }}>
+            <AdminSelect value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as typeof activeFilter)}>
+              <option value="active">Активные</option>
+              <option value="inactive">Неактивные</option>
+              <option value="all">Все</option>
+            </AdminSelect>
+          </div>
+        </div>
+        <div style={{ position: "relative", width: 260 }}>
+          <Search size={16} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }} aria-hidden />
           <input
             type="text"
+            className="admin-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="код, название…"
-            style={{ padding: "0.35rem 0.5rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
+            placeholder="Поиск: код, название…"
+            style={{ paddingLeft: "2.25rem" }}
           />
-        </label>
+        </div>
       </div>
 
       {loading ? (
         <p style={{ color: "var(--text-secondary)" }}>Загрузка…</p>
       ) : (
-        <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden", backgroundColor: "var(--bg-card)" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
-              // Без gap длинные значения (например "Северсталь") заполняют
-              // всю ширину своей fr-колонки на узких экранах и упираются
-              // прямо в следующую — тот же дефект, что и в
-              // ReferenceDataManager (см. комментарий там).
-              gap: "1rem",
-              padding: "0.65rem 1rem",
-              backgroundColor: "var(--bg-header)",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-1)",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.03em",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
+        <div className="admin-table">
+          <div className="admin-table-head" style={{ gridTemplateColumns: GRID_COLUMNS, gap: "1.5rem" }}>
             {["RAL", "Толщина", "Производитель", "Покрытие", "Статус", "Действия"].map((label) => (
               <span key={label}>{label}</span>
             ))}
           </div>
-          {items.length === 0 && (
-            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "var(--text-3)" }}>
-              Нет рулонов
-            </div>
-          )}
-          {items.map((item, i) =>
-            editingId === item.id ? (
-              <div
-                key={item.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
-                  alignItems: "center",
-                  gap: "1rem",
-                  padding: "0.5rem 1rem",
-                  borderBottom: "1px solid var(--border)",
-                  backgroundColor: "var(--bg-card-2)",
-                }}
-              >
-                <RefSelect
-                  label="Цвет RAL"
-                  options={refs.colors}
-                  value={editForm.colorId}
-                  onChange={(v) => setEditForm((prev) => ({ ...prev, colorId: v }))}
-                />
-                <RefSelect
-                  label="Толщина"
-                  options={refs.thicknesses}
-                  value={editForm.thicknessId}
-                  onChange={(v) => setEditForm((prev) => ({ ...prev, thicknessId: v }))}
-                />
-                <RefSelect
-                  label="Производитель"
-                  options={refs.manufacturers}
-                  value={editForm.manufacturerId}
-                  onChange={(v) => setEditForm((prev) => ({ ...prev, manufacturerId: v }))}
-                />
-                <RefSelect
-                  label="Покрытие"
-                  options={refs.coatings}
-                  value={editForm.coatingId}
-                  onChange={(v) => setEditForm((prev) => ({ ...prev, coatingId: v }))}
-                />
-                {editError && <p style={{ color: "var(--danger)" }}>{editError}</p>}
-                <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
-                <div style={{ display: "flex", gap: "var(--gap-actions)" }}>
-                  {/* variant="primary" — то же смысловое действие ("сохранить правку"),
-                      что и в ReferenceDataManager, где оно уже было синим; здесь раньше
-                      было нейтральным без причины (аудит, «Повторяющиеся паттерны»). */}
-                  <AdminButton type="button" variant="primary" onClick={() => saveEdit(item.id)}>
-                    Сохранить
-                  </AdminButton>
-                  <AdminButton type="button" onClick={() => setEditingId(null)}>Отмена</AdminButton>
+          {items.length === 0 && <div className="admin-table-empty">Нет рулонов</div>}
+          {items.map((item) => {
+            const isEditing = editingId === item.id;
+            return (
+              <div key={item.id}>
+                <div className="admin-table-row" style={{ gridTemplateColumns: GRID_COLUMNS, gap: "1.5rem" }}>
+                  {isEditing ? (
+                    <>
+                      <RefSelect
+                        label="Цвет RAL"
+                        options={refs.colors}
+                        value={editForm.colorId}
+                        onChange={(v) => setEditForm((prev) => ({ ...prev, colorId: v }))}
+                      />
+                      <RefSelect
+                        label="Толщина"
+                        options={refs.thicknesses}
+                        value={editForm.thicknessId}
+                        onChange={(v) => setEditForm((prev) => ({ ...prev, thicknessId: v }))}
+                      />
+                      <RefSelect
+                        label="Производитель"
+                        options={refs.manufacturers}
+                        value={editForm.manufacturerId}
+                        onChange={(v) => setEditForm((prev) => ({ ...prev, manufacturerId: v }))}
+                      />
+                      <RefSelect
+                        label="Покрытие"
+                        options={refs.coatings}
+                        value={editForm.coatingId}
+                        onChange={(v) => setEditForm((prev) => ({ ...prev, coatingId: v }))}
+                      />
+                      <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <AdminButton
+                          type="button"
+                          size="sm"
+                          variant="primary"
+                          className="admin-btn-col-1"
+                          icon={<Check size={13} />}
+                          onClick={() => saveEdit(item.id)}
+                        >
+                          Сохранить
+                        </AdminButton>
+                        <AdminButton
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="admin-btn-col-2"
+                          icon={<X size={13} />}
+                          onClick={() => setEditingId(null)}
+                        >
+                          Отмена
+                        </AdminButton>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ color: "var(--text-primary)" }}>{item.color.displayName}</span>
+                      <span style={{ color: "var(--text-secondary)" }}>{item.thickness.displayName}</span>
+                      <span style={{ color: "var(--text-secondary)" }}>{item.manufacturer.displayName}</span>
+                      <span style={{ color: "var(--text-secondary)" }}>{item.coating.displayName}</span>
+                      <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                          <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
+                            Открыть
+                          </Link>
+                          <Link
+                            href={`/admin/coils/${item.id}/print`}
+                            target="_blank"
+                            style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}
+                          >
+                            Печать
+                          </Link>
+                        </span>
+                        {/* Разделяет навигацию (открыть/печать) от действий, меняющих
+                            данные (изменить/деактивировать). */}
+                        <span aria-hidden style={{ width: 1, height: 16, flexShrink: 0, backgroundColor: "var(--border-strong)" }} />
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <AdminButton
+                            type="button"
+                            size="sm"
+                            variant="outline-accent"
+                            className="admin-btn-col-1"
+                            icon={<Pencil size={13} />}
+                            onClick={() => startEdit(item)}
+                          >
+                            Изменить
+                          </AdminButton>
+                          {item.active ? (
+                            <AdminButton
+                              type="button"
+                              size="sm"
+                              variant="outline-danger"
+                              className="admin-btn-col-2"
+                              icon={<PowerOff size={13} />}
+                              onClick={() => toggleActive(item.id, false)}
+                            >
+                              Деактивировать
+                            </AdminButton>
+                          ) : (
+                            <AdminButton
+                              type="button"
+                              size="sm"
+                              variant="outline-success"
+                              className="admin-btn-col-2"
+                              icon={<RotateCcw size={13} />}
+                              onClick={() => toggleActive(item.id, true)}
+                            >
+                              Восстановить
+                            </AdminButton>
+                          )}
+                        </span>
+                      </span>
+                    </>
+                  )}
                 </div>
+                {isEditing && editError && (
+                  <div
+                    style={{
+                      padding: "0 1.25rem 0.85rem",
+                      borderBottom: "1px solid var(--border)",
+                      color: "var(--danger)",
+                      fontSize: "var(--text-2)",
+                    }}
+                  >
+                    {editError}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div
-                key={item.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1.2fr 1fr 1.4fr 1fr 120px 350px",
-                  gap: "1rem",
-                  alignItems: "center",
-                  padding: "0.7rem 1rem",
-                  backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
-                  borderBottom: "1px solid var(--border)",
-                  fontSize: "var(--text-3)",
-                }}
-              >
-                <span style={{ color: "var(--text-primary)" }}>{item.color.displayName}</span>
-                <span style={{ color: "var(--text-secondary)" }}>{item.thickness.displayName}</span>
-                <span style={{ color: "var(--text-secondary)" }}>{item.manufacturer.displayName}</span>
-                <span style={{ color: "var(--text-secondary)" }}>{item.coating.displayName}</span>
-                <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активен" : "Неактивен"} />
-                <div style={{ display: "flex", alignItems: "center", gap: "var(--gap-actions)" }}>
-                  <Link href={`/coil/${item.id}`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
-                    Открыть
-                  </Link>
-                  <Link href={`/admin/coils/${item.id}/print`} target="_blank" style={{ color: "var(--link)", textDecoration: "none", fontSize: "var(--text-2)" }}>
-                    Печать
-                  </Link>
-                  {/* Разделяет навигацию (открыть/печать) от действий, меняющих
-                      данные (изменить/деактивировать) — раньше это деление
-                      читалось только через случайный перенос на вторую строку
-                      (аудит, «три разных gap подряд»); теперь явный разделитель
-                      в одном ряду с единым --gap-actions между всеми элементами. */}
-                  <span aria-hidden style={{ width: 1, height: 16, flexShrink: 0, backgroundColor: "var(--border-strong)" }} />
-                  <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
-                  <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
-                    {item.active ? "Деактивировать" : "Восстановить"}
-                  </AdminButton>
-                </div>
-              </div>
-            ),
-          )}
+            );
+          })}
         </div>
       )}
     </div>

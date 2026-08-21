@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { Check, Pencil, Plus, PowerOff, RotateCcw, X } from "lucide-react";
 
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminCard } from "@/components/admin/AdminCard";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSelect } from "@/components/admin/AdminSelect";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusPill } from "@/components/admin/StatusPill";
 
 type FieldConfig =
@@ -18,6 +23,8 @@ type ReferenceItem = {
 };
 
 type ApiErrorBody = { error?: { message?: string } };
+
+const PAGE_SIZE = 8;
 
 function initialFormState(fields: FieldConfig[]): Record<string, string> {
   return Object.fromEntries(fields.map((field) => [field.name, ""]));
@@ -65,10 +72,12 @@ function isTechnicalField(field: FieldConfig): boolean {
 export function ReferenceDataManager({
   resourcePath,
   title,
+  description,
   fields,
 }: {
   resourcePath: string;
   title: string;
+  description?: string;
   fields: FieldConfig[];
 }) {
   const [items, setItems] = useState<ReferenceItem[]>([]);
@@ -77,6 +86,7 @@ export function ReferenceDataManager({
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("active");
+  const [page, setPage] = useState(1);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Record<string, string>>({});
   const [editError, setEditError] = useState<string | null>(null);
@@ -190,127 +200,92 @@ export function ReferenceDataManager({
     }
   }
 
+  // Пагинация выводится из items/page на каждый рендер, а не синхронизируется
+  // отдельным эффектом — если после деактивации текущая страница опустела,
+  // currentPage сам зажимается к последней существующей.
+  const pageCount = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pagedItems = items.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const gridColumns = `repeat(${fields.length}, minmax(0, 1fr)) 140px minmax(352px, max-content)`;
+
   return (
-    <div style={{ maxWidth: 900 }}>
-      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 1.25rem" }}>{title}</h1>
+    <div style={{ maxWidth: 1040 }}>
+      <PageHeader title={title} description={description} />
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
-          marginBottom: "1.25rem",
-          padding: "1rem",
-          backgroundColor: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--radius-lg)",
-        }}
-      >
-        {fields.map((field) => {
-          const caption =
-            field.type === "number" && field.helpText
-              ? field.helpText
-              : field.type === "aliases"
-                ? "через запятую, необязательно"
-                : null;
-          return (
-            <label key={field.name} style={{ display: "flex", flexDirection: "column", fontSize: "var(--text-2)", color: "var(--text-secondary)" }}>
-              {field.label}
-              <input
-                type={field.type === "number" ? "number" : "text"}
-                value={form[field.name] ?? ""}
-                onChange={(e) => setForm((prev) => ({ ...prev, [field.name]: e.target.value }))}
-                required={field.type !== "aliases"}
-                style={{ marginTop: "0.25rem", padding: "0.4rem 0.5rem", backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)" }}
-              />
-              {/* Подпись всегда занимает строку, даже пустая — иначе поля
-                  без неё ("Название") короче полей с ней ("Варианты
-                  написания"), и высота полей в ряду расходится, и кнопка
-                  "Добавить" встаёт не туда. */}
-              <span style={{ color: "var(--text-muted)", fontSize: "var(--text-1)", marginTop: "0.2rem" }}>{caption ?? " "}</span>
-            </label>
-          );
-        })}
-        {/* Невидимая строка-заглушка над кнопкой той же высоты, что и
-            подпись поля над инпутом — при alignItems:flex-start кнопка
-            встаёт вровень с инпутами, а не с их подписями. */}
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span aria-hidden style={{ fontSize: "var(--text-2)", visibility: "hidden" }}>
-            &nbsp;
-          </span>
-          <AdminButton type="submit" variant="primary" disabled={submitting} style={{ marginTop: "0.25rem" }}>
-            Добавить
-          </AdminButton>
-        </div>
-      </form>
-      {formError && <p style={{ color: "var(--danger)" }}>{formError}</p>}
+      <AdminCard style={{ marginBottom: "1.5rem" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+          {fields.map((field) => {
+            const hint =
+              field.type === "number" && field.helpText
+                ? field.helpText
+                : field.type === "aliases"
+                  ? "через запятую, необязательно"
+                  : null;
+            return (
+              <label key={field.name} className="admin-field" style={{ flex: "1 1 200px", minWidth: 180 }}>
+                <span className="admin-field-label">{field.label}</span>
+                <input
+                  type={field.type === "number" ? "number" : "text"}
+                  className="admin-input"
+                  value={form[field.name] ?? ""}
+                  onChange={(e) => setForm((prev) => ({ ...prev, [field.name]: e.target.value }))}
+                  required={field.type !== "aliases"}
+                />
+                <span className="admin-field-hint">{hint ?? " "}</span>
+              </label>
+            );
+          })}
+          {/* Невидимая строка-заглушка над кнопкой той же высоты, что и
+              подпись поля над инпутом — при alignItems:flex-start кнопка
+              встаёт вровень с инпутами, а не с их подписями. */}
+          <div style={{ display: "flex", flexDirection: "column", flex: "0 0 auto" }}>
+            <span aria-hidden style={{ fontSize: "var(--text-2)", visibility: "hidden" }}>
+              &nbsp;
+            </span>
+            <AdminButton type="submit" variant="primary" icon={<Plus size={15} />} disabled={submitting}>
+              Добавить
+            </AdminButton>
+          </div>
+        </form>
+        {formError && (
+          <p style={{ color: "var(--danger)", fontSize: "var(--text-2)", margin: "0.75rem 0 0" }}>{formError}</p>
+        )}
+      </AdminCard>
 
-      <div style={{ marginBottom: "1rem", color: "var(--text-secondary)" }}>
-        <label>
-          Показать:{" "}
-          <select
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.25rem" }}>
+        <span style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)", fontWeight: 500 }}>Показать:</span>
+        <div style={{ width: 200 }}>
+          <AdminSelect
             value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
-            style={{ backgroundColor: "var(--bg-card-2)", border: "1px solid var(--border)", borderRadius: "var(--radius-sm)", color: "var(--text-primary)", padding: "0.35rem 0.5rem" }}
+            onChange={(e) => {
+              setFilter(e.target.value as typeof filter);
+              setPage(1);
+            }}
           >
             <option value="active">Активные</option>
             <option value="inactive">Неактивные</option>
             <option value="all">Все</option>
-          </select>
-        </label>
+          </AdminSelect>
+        </div>
       </div>
 
       {loading ? (
         <p style={{ color: "var(--text-secondary)" }}>Загрузка…</p>
       ) : (
-        <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden", backgroundColor: "var(--bg-card)" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `repeat(${fields.length}, 1fr) 140px 140px`,
-              // Без gap длинное значение может почти заполнить свою
-              // fr-колонку и упереться прямо в левый край следующей —
-              // "7024RAL 7024" в одну строку без пробела (тот же класс
-              // бага, что и в CoilsManager, см. комментарий там).
-              gap: "1.5rem",
-              padding: "0.65rem 1rem",
-              backgroundColor: "var(--bg-header)",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-1)",
-              fontWeight: 600,
-              textTransform: "uppercase",
-              borderBottom: "1px solid var(--border)",
-            }}
-          >
+        <div className="admin-table">
+          <div className="admin-table-head" style={{ gridTemplateColumns: gridColumns, gap: "1.5rem" }}>
             {fields.map((field) => (
               <span key={field.name}>{field.label}</span>
             ))}
             <span>Статус</span>
-            <span />
+            <span>Действия</span>
           </div>
-          {items.length === 0 && (
-            <div style={{ padding: "1.5rem 1rem", textAlign: "center", color: "var(--text-muted)", fontSize: "var(--text-3)" }}>
-              Нет записей
-            </div>
-          )}
-          {items.map((item, i) => {
+          {pagedItems.length === 0 && <div className="admin-table-empty">Нет записей</div>}
+          {pagedItems.map((item) => {
             const isEditing = editingId === item.id;
             return (
               <div key={item.id}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${fields.length}, 1fr) 140px 140px`,
-                    gap: "1.5rem",
-                    alignItems: "center",
-                    padding: "0.6rem 1rem",
-                    backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
-                    borderBottom: isEditing && editError ? "none" : "1px solid var(--border)",
-                    fontSize: "var(--text-3)",
-                  }}
-                >
+                <div className="admin-table-row" style={{ gridTemplateColumns: gridColumns, gap: "1.5rem" }}>
                   {fields.map((field) => {
                     const isTechnical = isTechnicalField(field);
                     return (
@@ -318,18 +293,10 @@ export function ReferenceDataManager({
                         {isEditing ? (
                           <input
                             type={field.type === "number" ? "number" : "text"}
+                            className="admin-input"
                             value={editForm[field.name] ?? ""}
                             onChange={(e) => setEditForm((prev) => ({ ...prev, [field.name]: e.target.value }))}
-                            style={{
-                              width: "100%",
-                              padding: "0.3rem 0.4rem",
-                              backgroundColor: "var(--bg-card-2)",
-                              border: "1px solid var(--border)",
-                              borderRadius: "var(--radius-sm)",
-                              color: "var(--text-primary)",
-                              fontSize: "var(--text-2)",
-                              fontFamily: isTechnical ? "var(--font-mono)" : undefined,
-                            }}
+                            style={{ fontFamily: isTechnical ? "var(--font-mono)" : undefined }}
                           />
                         ) : (
                           <span style={{ fontFamily: isTechnical ? "var(--font-mono)" : undefined }}>
@@ -342,22 +309,67 @@ export function ReferenceDataManager({
                   <span>
                     <StatusPill tone={item.active ? "success" : "danger"} label={item.active ? "Активна" : "Неактивна"} />
                   </span>
-                  <span style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
                     {isEditing ? (
                       <>
-                        <AdminButton type="button" variant="primary" onClick={() => submitEdit(item.id)} disabled={editSubmitting}>
+                        <AdminButton
+                          type="button"
+                          size="sm"
+                          variant="primary"
+                          className="admin-btn-col-1"
+                          icon={<Check size={13} />}
+                          onClick={() => submitEdit(item.id)}
+                          disabled={editSubmitting}
+                        >
                           Сохранить
                         </AdminButton>
-                        <AdminButton type="button" onClick={cancelEdit} disabled={editSubmitting}>
+                        <AdminButton
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="admin-btn-col-2"
+                          icon={<X size={13} />}
+                          onClick={cancelEdit}
+                          disabled={editSubmitting}
+                        >
                           Отмена
                         </AdminButton>
                       </>
                     ) : (
                       <>
-                        <AdminButton type="button" onClick={() => startEdit(item)}>Изменить</AdminButton>
-                        <AdminButton type="button" onClick={() => toggleActive(item.id, !item.active)}>
-                          {item.active ? "Деактивировать" : "Восстановить"}
+                        <AdminButton
+                          type="button"
+                          size="sm"
+                          variant="outline-accent"
+                          className="admin-btn-col-1"
+                          icon={<Pencil size={13} />}
+                          onClick={() => startEdit(item)}
+                        >
+                          Изменить
                         </AdminButton>
+                        {item.active ? (
+                          <AdminButton
+                            type="button"
+                            size="sm"
+                            variant="outline-danger"
+                            className="admin-btn-col-2"
+                            icon={<PowerOff size={13} />}
+                            onClick={() => toggleActive(item.id, false)}
+                          >
+                            Деактивировать
+                          </AdminButton>
+                        ) : (
+                          <AdminButton
+                            type="button"
+                            size="sm"
+                            variant="outline-success"
+                            className="admin-btn-col-2"
+                            icon={<RotateCcw size={13} />}
+                            onClick={() => toggleActive(item.id, true)}
+                          >
+                            Восстановить
+                          </AdminButton>
+                        )}
                       </>
                     )}
                   </span>
@@ -365,8 +377,7 @@ export function ReferenceDataManager({
                 {isEditing && editError && (
                   <div
                     style={{
-                      padding: "0 1rem 0.75rem",
-                      backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)",
+                      padding: "0 1.25rem 0.85rem",
                       borderBottom: "1px solid var(--border)",
                       color: "var(--danger)",
                       fontSize: "var(--text-2)",
@@ -378,6 +389,7 @@ export function ReferenceDataManager({
               </div>
             );
           })}
+          <AdminPagination page={currentPage} pageSize={PAGE_SIZE} total={items.length} onPageChange={setPage} />
         </div>
       )}
     </div>

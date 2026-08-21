@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { Download, FileUp } from "lucide-react";
 
 import { AdminButton } from "@/components/admin/AdminButton";
+import { AdminCard } from "@/components/admin/AdminCard";
+import { PageHeader } from "@/components/admin/PageHeader";
 import { StatusPill } from "@/components/admin/StatusPill";
 
 type PreviewRow =
@@ -101,42 +104,47 @@ export function ExcelImportManager() {
 
   return (
     <div style={{ maxWidth: 960 }}>
-      <h1 style={{ fontSize: "var(--text-7)", color: "var(--text-primary)", margin: "0 0 0.75rem" }}>Импорт рулонов из Excel</h1>
-      <p style={{ color: "var(--text-secondary)", marginTop: 0 }}>
-        <a href="/api/admin/export/excel-template" style={{ color: "var(--link)" }}>
+      <PageHeader title="Импорт рулонов из Excel" />
+
+      <AdminCard style={{ marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "center", flexWrap: "wrap", marginBottom: "0.85rem" }}>
+          <input
+            type="file"
+            accept=".xlsx"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)" }}
+          />
+          <AdminButton type="button" variant="primary" icon={<FileUp size={15} />} onClick={handleUpload} disabled={!file || uploading}>
+            {uploading ? "Загрузка…" : "Загрузить и проверить"}
+          </AdminButton>
+        </div>
+        <a
+          href="/api/admin/export/excel-template"
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "var(--link)", fontSize: "var(--text-2)", textDecoration: "none" }}
+        >
+          <Download size={14} aria-hidden />
           Скачать шаблон (.xlsx)
         </a>
-      </p>
+      </AdminCard>
 
-      <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "1rem", padding: "1rem", backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)" }}>
-        <input
-          type="file"
-          accept=".xlsx"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          style={{ color: "var(--text-secondary)" }}
-        />
-        <AdminButton type="button" variant="primary" onClick={handleUpload} disabled={!file || uploading} style={{ padding: "0.45rem 1.1rem", borderRadius: "var(--radius-md)" }}>
-          {uploading ? "Загрузка…" : "Загрузить и проверить"}
-        </AdminButton>
-      </div>
-
-      {error && <p style={{ color: "var(--danger)" }}>{error}</p>}
+      {error && <p style={{ color: "var(--danger)", fontSize: "var(--text-2)" }}>{error}</p>}
 
       {preview && (
         <div>
-          <p style={{ color: "var(--text-secondary)" }}>
-            Всего строк: {preview.totalRows}, корректных: {preview.validRows}, с ошибками:{" "}
-            {preview.invalidRows}
+          <p style={{ color: "var(--text-secondary)", fontSize: "var(--text-3)" }}>
+            Всего строк: {preview.totalRows}, корректных: {preview.validRows}, с ошибками: {preview.invalidRows}
           </p>
-          <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius-lg)", overflow: "hidden", backgroundColor: "var(--bg-card)", marginBottom: "1rem" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", padding: "0.65rem 1rem", backgroundColor: "var(--bg-header)", color: "var(--text-muted)", fontSize: "var(--text-1)", fontWeight: 600, textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>
+          <div className="admin-table" style={{ marginBottom: "1.25rem" }}>
+            <div className="admin-table-head" style={{ gridTemplateColumns: "80px 140px 1fr", gap: "1.5rem" }}>
               <span style={{ textAlign: "right" }}>Строка</span>
               <span>Статус</span>
               <span>Детали</span>
             </div>
-            {preview.rows.map((row, i) => (
-              <div key={row.rowNumber} style={{ display: "grid", gridTemplateColumns: "80px 140px 1fr", alignItems: "center", padding: "0.55rem 1rem", backgroundColor: i % 2 === 0 ? "var(--bg-card)" : "var(--bg-card-2)", borderBottom: "1px solid var(--border)", fontSize: "var(--text-3)" }}>
-                <span style={{ color: "var(--text-secondary)", fontFamily: "var(--font-mono)", textAlign: "right" }}>{row.rowNumber}</span>
+            {preview.rows.map((row) => (
+              <div key={row.rowNumber} className="admin-table-row" style={{ gridTemplateColumns: "80px 140px 1fr", gap: "1.5rem" }}>
+                <span className="mono" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-mono)", textAlign: "right" }}>
+                  {row.rowNumber}
+                </span>
                 <StatusPill tone={row.status === "valid" ? "success" : "danger"} label={row.status === "valid" ? "Корректна" : "Ошибка"} />
                 <span style={{ color: row.status === "invalid" ? "var(--danger)" : "var(--text-secondary)" }}>
                   {row.status === "invalid" ? row.errors.join("; ") : "—"}
@@ -144,25 +152,25 @@ export function ExcelImportManager() {
               </div>
             ))}
           </div>
-          <AdminButton type="button" variant="primary" onClick={handleConfirm} disabled={confirming || preview.validRows === 0} style={{ padding: "0.45rem 1.1rem", borderRadius: "var(--radius-md)" }}>
+          <AdminButton type="button" variant="primary" onClick={handleConfirm} disabled={confirming || preview.validRows === 0}>
             {confirming ? "Импорт…" : `Импортировать (${preview.validRows})`}
           </AdminButton>
         </div>
       )}
 
       {report && (
-        <div style={{ padding: "1rem", backgroundColor: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "var(--radius-lg)" }}>
-          <p style={{ color: "var(--text-primary)" }}>
+        <AdminCard>
+          <p style={{ color: "var(--text-primary)", fontSize: "var(--text-3)", margin: 0 }}>
             Импортировано: {report.imported}, пропущено: {report.skipped}
           </p>
           {report.skippedRows.length > 0 && (
-            <ul style={{ color: "var(--text-secondary)" }}>
+            <ul style={{ color: "var(--text-secondary)", fontSize: "var(--text-2)", paddingLeft: "1.2rem" }}>
               {report.skippedRows.map((row, index) => (
                 <li key={index}>{row.reason}</li>
               ))}
             </ul>
           )}
-        </div>
+        </AdminCard>
       )}
     </div>
   );
