@@ -2,7 +2,7 @@ import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, RouteHandlerCallbackOptions, RuntimeCaching, SerwistGlobalConfig } from "serwist";
 import { ExpirationPlugin, NetworkFirst, NetworkOnly, Serwist } from "serwist";
 
-import { isCheckPagePath, isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
+import { isAdminPath, isCheckPagePath, isCoilPagePath, isCoilVerdictApiPath } from "@/lib/pwa/sw-rules";
 
 // Проект типизируется под lib "dom" (см. tsconfig.json), а не "webworker" —
 // они конфликтуют при совместном включении, поэтому вместо полного
@@ -102,6 +102,19 @@ const checkPageResilient: RuntimeCaching = {
   handler: checkPageNetworkFirstWithRetry,
 };
 
+/**
+ * `/admin/*` и `/api/admin/*` целиком — network-only. Обоснование в
+ * `isAdminPath` (src/lib/pwa/sw-rules.ts): без этого правила редиректы
+ * `redirect()` из `(protected)/layout.tsx`/`/admin/login` попадают под
+ * `NetworkFirst` из `defaultCache`, которая падает на `opaqueredirect`-ответе
+ * с `SerwistError("no-response")` — реальный сбой навигации в production,
+ * не гипотетический.
+ */
+const adminNetworkOnly: RuntimeCaching = {
+  matcher: ({ sameOrigin, url }) => sameOrigin && isAdminPath(url.pathname),
+  handler: new NetworkOnly(),
+};
+
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: true,
@@ -116,7 +129,7 @@ const serwist = new Serwist({
   // правило `defaultCache` — см. его комментарий) уже покрывает офлайн-
   // требование "справочники доступны офлайн" без отдельного JSON-эндпоинта
   // (см. Decision Log, запись Iteration 7).
-  runtimeCaching: [coilApiNetworkOnly, coilPageNetworkOnly, checkPageResilient, ...defaultCache],
+  runtimeCaching: [coilApiNetworkOnly, coilPageNetworkOnly, checkPageResilient, adminNetworkOnly, ...defaultCache],
 });
 
 serwist.addEventListeners();

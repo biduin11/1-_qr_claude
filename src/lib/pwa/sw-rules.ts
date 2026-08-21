@@ -36,3 +36,32 @@ export function isCoilPagePath(pathname: string): boolean {
 export function isCheckPagePath(pathname: string): boolean {
   return /^\/check\/?$/.test(pathname);
 }
+
+/**
+ * Весь admin-раздел (`/admin/*` и `/api/admin/*`) — тоже network-only, но по
+ * другой причине, чем `/coil/:id`: не устаревшие данные, а сбой самого
+ * механизма кэша. `(protected)/layout.tsx` и `/admin/login` завязаны на
+ * `redirect()` (307) — а `Content-Type`-матчер `defaultCache` для HTML-
+ * навигаций не совпадает у ответа без тела, поэтому редирект попадал под
+ * общее правило `others` (`NetworkFirst`). Для навигационных (`mode:
+ * "navigate"`) запросов `request.redirect` браузер принудительно выставляет
+ * в `"manual"` (см. ссылку на https://github.com/GoogleChrome/workbox/issues/1796
+ * в самом serwist, node_modules/serwist/src/lib/strategies/StrategyHandler.ts) —
+ * сервер отвечает 307, `fetch()` внутри service worker получает ответ типа
+ * `"opaqueredirect"`, а `Cache.prototype.put()` по спеке кидает `TypeError`
+ * на такой ответ. `NetworkFirst.fetchAndCachePut` ловит эту ошибку, откатывается
+ * на `cacheMatch` — а кэша ещё нет (первый визит) — и в итоге бросает
+ * `SerwistError("no-response")`, что и ловится `src/app/error.tsx`/
+ * `global-error.tsx` как "Что-то пошло не так" при любом заходе на
+ * `/admin/login` уже залогиненным или на защищённую страницу разлогиненным.
+ * NetworkOnly не пытается кэшировать ответ вообще — `opaqueredirect`
+ * передаётся напрямую в `respondWith()`, браузер сам выполняет редирект как
+ * обычно. Заодно это и правильно по сути: admin — авторизованный
+ * динамический раздел без офлайн-требования (не как `/check`), кэшировать
+ * его страницы/API service worker'ом в принципе не нужно.
+ */
+export function isAdminPath(pathname: string): boolean {
+  // startsWith("/admin") без разделителя ловил бы и /administration — те же
+  // грабли, от которых isCoilVerdictApiPath защищается через "/api/coil/".
+  return pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/");
+}
